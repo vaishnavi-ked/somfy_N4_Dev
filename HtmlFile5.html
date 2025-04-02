@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to Niagara Points</title>
+    
+    <script src="file:^TextFile.js"></script>
+    <script type="text/javascript">
+        var require = {
+            paths: {
+                "nmodule": "/module",
+                "baja": "/module/bajaScript/rc/plugin/baja",
+                "bajaScript": "/module/bajaScript/rc",
+                "bajaux": "/module/bajaux/rc",
+                "lex": "/module/js/rc/lex/lexplugin",
+                "log": "/module/js/rc/log/logPlugin",
+                "css": "/module/js/com/tridium/js/ext/require/css",
+                "jquery": "/module/js/rc/jquery/jquery",
+                "Handlebars": "/module/js/rc/handlebars/handlebars",
+                "Promise": "/module/js/rc/bluebird/bluebird",
+                "hbs": "/module/js/rc/require-handlebars-plugin/hbs",
+                "i18nprecompile": "/module/js/rc/require-handlebars-plugin/hbs/i18nprecompile",
+                "json2": "/module/js/rc/require-handlebars-plugin/hbs/json2",
+                "underscore": "/module/js/rc/underscore/underscore",
+                "baja.comm.Batch": "/module/bajaScript/baja.comm.Batch",
+                "dialogs": '/module/js/rc/dialogs/dialogs.built.min',
+                // "baja!schedule:Schedule": "/module/bajaScript/rc/schedule/Schedule",
+            },
+            hbs: {
+                disableI18n: true
+            }
+        };
+        console.log("RequireJS paths set:", require);
+    </script>
+</head>
+<body>
+
+<h1>BajaScript Test Page</h1>
+<input type="file" id="uploadExcel" accept=".xlsx, .xls" />
+<!--<button id="updateButton">Load & Update Points</button>-->
+
+<script src="file:^newxlsx.js"></script>
+<script type="text/javascript" 
+        data-main="/module/bajaScript/rc/plugin/baja" 
+        src="file:^rc/requireJs.js"></script>
+
+<script>
+    console.log("Script execution started.");
+
+// document.getElementById('uploadExcel').addEventListener('change', function (event) {
+//     console.log("File selected.");
+
+//     const file = event.target.files[0];
+//     console.log("File details:", file);
+
+//     const reader = new FileReader();
+
+//     reader.onload = function (e) {
+//         console.log("File read successfully.");
+
+//         const data = new Uint8Array(e.target.result);
+//         const workbook = XLSX.read(data, { type: 'array' });
+
+//         console.log("Workbook loaded:", workbook);
+
+//         // Get the first sheet
+//         const sheetName = workbook.SheetNames[0];
+//         const sheet = workbook.Sheets[sheetName];
+
+//         console.log("Sheet selected:", sheetName);
+
+//         // Convert sheet data to JSON
+//         const jsonData = parseSheetToJson(sheet);
+//         console.log("Parsed Excel Data:", jsonData);
+
+//         // Call updateNiagaraPoints with the parsed data
+//         updateNiagaraPoints(jsonData);
+//     };
+
+//     reader.readAsArrayBuffer(file);
+// });
+
+// function parseSheetToJson(sheet) {
+//     console.log("Parsing sheet data...");
+
+//     const range = XLSX.utils.decode_range(sheet["!ref"]);
+//     console.log("Sheet range:", range);
+
+//     const headers = [];
+//     const jsonData = [];
+
+//     for (let C = range.s.c; C <= range.e.c; ++C) {
+//         const cell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c: C })];
+//         headers.push(cell ? cell.v : `Column${C}`);
+//     }
+
+//     console.log("Extracted headers:", headers);
+
+//     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+//         let row = {};
+//         for (let C = range.s.c; C <= range.e.c; ++C) {
+//             const cell = sheet[XLSX.utils.encode_cell({ r: R, c: C })];
+//             row[headers[C - range.s.c]] = cell ? cell.v : null;
+//         }
+//         jsonData.push(row);
+//     }
+
+//     console.log("Parsed JSON Data:", jsonData);
+//     return jsonData;
+// }
+
+// function updateNiagaraPoints(jsonData) {
+//     console.log("Updating Niagara Points...");
+//     console.log("Received Data:", jsonData);
+
+//     require([
+//         'baja!',
+//         'baja!control:NumericOverride'
+//     ], function (baja, types) {
+//         const sub = new baja.Subscriber();
+
+//         jsonData.forEach((row, index) => {
+//             console.log(`Processing row ${index + 1}:`, row);
+
+//             const pointName = row["PointName"];
+//             const pointValue = row["Value"];
+
+//             if (!pointName || pointValue === undefined || pointValue === null) {
+//                 console.warn(`Skipping row ${index + 1}: Missing data`, row);
+//                 return;
+//             }
+
+//             const ordPath = `station:|slot:/Drivers/MyDevice/${pointName}`;
+//             console.log(`Constructed Ord Path: ${ordPath}`);
+
+//             baja.Ord.make(ordPath)
+//                 .get({ subscriber: sub })
+//                 .then(point => {
+//                     console.log(`Retrieved point: ${pointName}, Current Value: ${point.get("out") ? point.get("out").getValue() : "N/A"}`);
+
+//                     const overrideVal = baja.$("control:NumericOverride", {
+//                         value: parseFloat(pointValue),
+//                         duration: baja.RelTime.make({ seconds: 120 }) // Override lasts 5 seconds
+//                     });
+
+//                     sub.attach("changed", function (prop) {
+//                         if (prop.getName() === "out") {
+//                             console.log(`Updated Out Value for ${pointName}: ${point.getOutDisplay()}`);
+//                         }
+//                     });
+
+//                     return point.invoke({
+//                         slot: 'override',
+//                         value: overrideVal
+//                     });
+//                 })
+//                 .then(() => {
+//                     console.log(`Successfully overridden ${pointName} to ${pointValue}`);
+//                 })
+//                 .catch(err => {
+//                     console.error(`Failed to override ${pointName}:`, err);
+//                 });
+//         });
+
+//         // Cleanup subscriber after operations
+//         setTimeout(() => {
+//             sub.unsubscribeAll();
+//             sub.detach();
+//         }, 120000);
+//     });
+// }
+
+document.getElementById('uploadExcel').addEventListener('change', function (event) {
+    console.log("File selected.");
+
+    const file = event.target.files[0];
+    console.log("File details:", file);
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        console.log("File read successfully.");
+
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        console.log("Workbook loaded:", workbook);
+
+        // Get the first sheet
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        console.log("Sheet selected:", sheetName);
+
+        // Convert sheet data to JSON
+        const jsonData = parseSheetToJson(sheet);
+        console.log("Parsed Excel Data:", jsonData);
+
+        // Process each row in the JSON data
+        jsonData.forEach(row => {
+            // Skip rows where all fields are null or empty
+            if (!row["SchedulePath"] && !row["EventName"] && !row["EventType"] && !row["EventStart"] && !row["EventFinish"] && !row["EventValue"]) {
+                console.warn("Skipping empty row:", row);
+                return;
+            }
+
+            const schedulePath = row["SchedulePath"] || "station:|slot:/Drivers/MyDevice/DefaultSchedule"; // Default schedule path
+            const eventData = {
+                name: row["EventName"] || "UnnamedEvent", // Default event name
+                type: row["EventType"] || "Date", // Default event type
+                start: row["EventStart"], // Start time of the event
+                finish: row["EventFinish"], // End time of the event
+                value: row["EventValue"] !== undefined ? row["EventValue"] : true // Default value (true)
+            };
+
+            // Validate required fields
+            if (!eventData.start || !eventData.finish) {
+                console.warn("Skipping row due to missing start or finish time:", row);
+                return;
+            }
+
+            // Call updateNiagaraPoints with the parsed data
+            updateSchedule(schedulePath, eventData);
+        });
+    };
+
+    reader.readAsArrayBuffer(file);
+});
+
+function parseSheetToJson(sheet) {
+    console.log("Parsing sheet data...");
+
+    const range = XLSX.utils.decode_range(sheet["!ref"]);
+    console.log("Sheet range:", range);
+
+    const headers = [];
+    const jsonData = [];
+
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c: C })];
+        headers.push(cell ? cell.v : `Column${C}`);
+    }
+
+    console.log("Extracted headers:", headers);
+
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        let row = {};
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell = sheet[XLSX.utils.encode_cell({ r: R, c: C })];
+            row[headers[C - range.s.c]] = cell ? cell.v : null;
+        }
+        jsonData.push(row);
+    }
+
+    console.log("Parsed JSON Data:", jsonData);
+    return jsonData;
+}
+
+function updateSchedule(jsonData) {
+    console.log("Updating Schedule...");
+    console.log("Received Data:", jsonData);
+
+    require([
+  'baja',
+  'baja!',
+  'dialogs'
+], function (
+  baja,
+  types,
+  dialogs
+) {
+  
+  "use strict";
+
+  const sub = new baja.Subscriber();
+
+  dialogs.showOk({
+    content: (dlg, jq) => {
+      jq.text("Updating Special Events in BooleanSchedule...");
+
+      return baja.Ord.make("station:|slot:/Drivers/MyDevice/BooleanSchedule")
+        .get({ subscriber: sub })
+        .then((schedule) => {
+          if (!schedule) {
+            throw new Error("BooleanSchedule component not found!");
+          }
+
+          // Access the Special Events collection
+          return schedule.get("specialEvents").then((specialEvents) => {
+            if (!specialEvents) {
+              throw new Error("Special Events list not found!");
+            }
+
+            // Create a new Special Event
+            const newEvent = baja.$("control:ScheduleEvent", {
+              name: "CustomEvent",
+              value: baja.Boolean.TRUE, // Set event to TRUE or FALSE as needed
+              time: baja.AbsTime.now(), // Schedule event for current time
+            });
+
+            // Add event to the Special Events list
+            return specialEvents.add(newEvent);
+          });
+        });
+    }
+  })
+    .promise()
+    .catch((err) => baja.error(err))
+    .finally(function () {
+      sub.unsubscribeAll();
+      sub.detach();
+    });
+
+});
+
+}
+require(['baja!','baja!schedule:BooleanSchedule'], function (Schedule) {
+    console.log("Module loaded successfully:", Schedule);
+    
+}, function (err) {
+    console.error("Failed to load module:", err);
+});
+</script>
+
+</body>
+</html>

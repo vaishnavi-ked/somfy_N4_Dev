@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niagara 4 Numeric Points</title>
+    <script type="text/javascript">
+        var require = {
+            paths: {
+        //pointing nmodule at /module is a Niagara convention, allowing us to
+        //refer to module resources without having RequireJS get hung up on
+        //the use of absolute paths everywhere.
+        "nmodule": "/module",
+        "baja": "/module/bajaScript/rc/plugin/baja",
+        "bajaScript": "/module/bajaScript/rc",
+        "bajaux": "/module/bajaux/rc",
+        "lex": "/module/js/rc/lex/lexplugin",
+        "log": "/module/js/rc/log/logPlugin",
+        "css": "/module/js/com/tridium/js/ext/require/css",
+
+        "jquery": "/module/js/rc/jquery/jquery",
+        "Handlebars": "/module/js/rc/handlebars/handlebars",
+        "Promise": "/module/js/rc/bluebird/bluebird",
+
+        // these are runtime dependencies for require-handlebars-plugin
+        "hbs": "/module/js/rc/require-handlebars-plugin/hbs",
+        "i18nprecompile": "/module/js/rc/require-handlebars-plugin/hbs/i18nprecompile",
+        "json2": "/module/js/rc/require-handlebars-plugin/hbs/json2",
+        "underscore": "/module/js/rc/underscore/underscore"
+      },
+            hbs: {
+                disableI18n: true
+            }
+        };
+    </script>
+    <script type="text/javascript" 
+        data-main="/module/bajaScript/rc/plugin/baja" 
+        src="https://localhost/module/js/com/tridium/js/ext/require/require.min.js"></script>
+</head>
+<body>
+    <h1>Niagara 4 - Real-Time Numeric Points</h1>
+
+    <h2>Live Values:</h2>
+    <p>Point A: <span id="myElement1">Loading...</span></p>
+    <p>Point B: <span id="myElement2">Loading...</span></p>
+    <p>Point C: <span id="myElement3">Loading...</span></p>
+    <p>Point D: <span id="myElement4">Loading...</span></p>
+
+    <script type="text/javascript">
+        require(["baja!"], function (baja) {
+            function go() {
+                var ords = [
+                    "station:|slot:/alarm/NumericWritable",
+                    "station:|slot:/alarm/NumericWritable",
+                    "station:|slot:/alarm/NumericWritable",
+                    "station:|slot:/Services/AlarmService"
+                ];
+
+                var resolve = new baja.BatchResolve(ords);
+
+                resolve.resolve({
+                    each: function () {
+                        console.log("Resolved: " + this.getNavOrd());
+                    },
+                    fail: function (err) {
+                        console.error("Resolution Failed:", err);
+                    }
+                });
+
+                // Attach Subscribers Efficiently
+                ords.forEach((ord, index) => {
+                    var subscriber = new baja.Subscriber();
+
+                    var updateFunc = function () {
+                        let elementId = "myElement" + (index + 1);
+                        let element = document.getElementById(elementId);
+                        if (element) {
+                            element.innerHTML = this.getOut().getValueDisplay();
+                        } else {
+                            console.warn("Element ID not found:", elementId);
+                        }
+                    };
+
+                    subscriber.attach("changed", updateFunc);
+
+                    baja.Ord.make(ord).get({
+                        ok: updateFunc,
+                        subscriber: subscriber,
+                        fail: function (err) {
+                            console.error("Failed to fetch point:", ord, err);
+                        }
+                    });
+                });
+            }
+
+            // Run the function after BajaScript is ready
+            go();
+        });
+    </script>
+</body>
+</html>

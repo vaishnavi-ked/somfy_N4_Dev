@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niagara 4 Alarm Console</title>
+    <script type="text/javascript">
+        var require = {
+            paths: {
+                "nmodule": "/module",
+                "baja": "/module/bajaScript/rc/plugin/baja",
+                "bajaScript": "/module/bajaScript/rc",
+                "bajaux": "/module/bajaux/rc",
+                "lex": "/module/js/rc/lex/lexplugin",
+                "log": "/module/js/rc/log/logPlugin",
+                "css": "/module/js/com/tridium/js/ext/require/css",
+                "jquery": "/module/js/rc/jquery/jquery",
+                "Handlebars": "/module/js/rc/handlebars/handlebars",
+                "Promise": "/module/js/rc/bluebird/bluebird",
+                "hbs": "/module/js/rc/require-handlebars-plugin/hbs",
+                "i18nprecompile": "/module/js/rc/require-handlebars-plugin/hbs/i18nprecompile",
+                "json2": "/module/js/rc/require-handlebars-plugin/hbs/json2",
+                "underscore": "/module/js/rc/underscore/underscore"
+            },
+            hbs: {
+                disableI18n: true
+            }
+        };
+        console.log("RequireJS paths set:", require);
+    </script>
+    <script type="text/javascript" 
+        data-main="/module/bajaScript/rc/plugin/baja" 
+        src="file:^rc/requireJs.js"></script>
+</head>
+<body>
+<h2>Acknowledged Alarms</h2>
+    <table id="alarmsTable">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Alarm Message</th>
+                <th>Priority</th>
+                <th>Acknowledged By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="4">Loading alarms...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch acknowledged alarms from Niag
+
+        // Function to add alarms to the table
+        
+        
+        require(["baja!"], function (baja) {
+    console.log("BajaScript is ready");
+
+    baja.Ord.make("alarm:AlarmService").get()
+                .then(function (alarmService) {
+                    return alarmService.invoke("queryAlarms", {
+                        query: "baja:AlarmRecord and acked = true",
+                        limit: 50  // Retrieve up to 50 alarms
+                    });
+                })
+                .then(function (queryResult) {
+                    let tableBody = document.querySelector("#alarmsTable tbody");
+                    tableBody.innerHTML = ""; // Clear loading message
+                    
+                    queryResult.cursor({
+                        each: function () {
+                            let alarm = this.get();
+                            addToTable(alarm);
+                        }
+                    });
+                })
+                .catch(function (err) {
+                    console.error("Error fetching alarms:", err);
+                    document.querySelector("#alarmsTable tbody").innerHTML = `<tr><td colspan="4">Error loading alarms</td></tr>`;
+                });
+                function addToTable(alarm) {
+            let tableBody = document.querySelector("#alarmsTable tbody");
+            let row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${alarm.get("timestamp")}</td>
+                <td>${alarm.get("message")}</td>
+                <td>${alarm.get("priority")}</td>
+                <td>${alarm.get("ackedBy") || "Unknown"}</td>
+            `;
+
+            tableBody.appendChild(row);
+        }
+
+});
+
+    </script>
+
+</body>
+</html>
