@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Blinds Control Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+    --primary-color: #2A6DFF;
+    --success-color: #00C851;
+    --danger-color: #ff4444;
+    --disabled-color: #e0e0e0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.navbar {
+    background-color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 20px;
+}
+
+.logo {
+    height: 25px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-btn {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dropdown-btn:hover {
+    background: #f8f9fa;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    z-index: 100;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.dropdown-link:hover {
+    background: #f8f9fa;
+}
+
+.dashboard-container {
+    /* padding: 2rem; */
+    padding: 0 2rem;
+    max-width: 1400px;
+    height: 100vh;
+    margin: 0 auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 1rem 0;
+}
+
+.control-card {
+    background: white;
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    /* border: 2px solid #0c0b0b; */
+}
+
+.control-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    /* display: block; */
+    /* justify-content: space-between;
+    align-items: center; */
+    /* margin-bottom: 1.5rem; */
+    /* border: 2px solid #0c0b0b; */
+    text-align: start;
+}
+.card-dropdown{
+    display: flex;
+    justify-content: end;
+    align-items: end;
+    margin-bottom: 1.5rem;
+}
+
+.motor-info{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.motor-info i{
+    margin: 0;
+    font-size: 1.2rem;
+    /* font-size: 1.2rem; */
+    /* border: 2px solid #0c0b0b; */
+}
+
+.motor-info h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 1.2rem;
+    color: #333;
+    /* border: 2px solid #0c0b0b; */
+}
+
+/* .motor-info p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: #666;
+} */
+
+.dropdowns {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.moco-dropdown,
+.motor-dropdown {
+    padding: 0.1rem 0.5rem; /* Reduced padding for smaller height */
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem; /* Optional: Reduce font size for better proportion */
+    height: 20px; /* Explicit height for consistency */
+    /* width: 100px; */
+}
+
+.moco-dropdown:hover,
+.motor-dropdown:hover {
+    border-color: #000000;
+}
+
+.blind-container {
+        position: relative;
+        width: 200px;
+        height: 140px;
+        background-color: #eee;
+        overflow: hidden;
+        /* border: 5px solid #0c0b0b; */
+        border-top: 5px solid #0c0b0b;
+        /* border-radius: 8px; */
+        /* margin-left: 50px; */
+    }
+
+    .blind{
+        position: absolute;
+        margin-left: 16px;
+        width: 85%;
+        height: 100%; /* Will change based on the motor position */
+        transition: all 0.5s ease;
+        background: url('/Images/freepik__upload__35645.png');
+        background-size: cover;
+    }
+
+    .slat {
+        width: 100%;
+        height: 10px;
+        background-color: #d1a15e;
+        margin-bottom: 2px;
+    }
+
+.progress-container {
+    margin: 0.5rem 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #aeaaaa;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #e84b87;
+    width: 75%;
+    transition: width 0.4s ease;
+}
+
+.control-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1a5be6;
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #e53935;
+}
+
+.btn:disabled {
+    background: var(--disabled-color);
+    cursor: not-allowed;
+    color: #666;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.page-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.page-btn:hover:not(.active) {
+    background: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+    
+    .navbar {
+        padding: 1rem;
+    }
+    
+    .title {
+        font-size: 1.25rem;
+    }
+}
+
+.cards-cont{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* border: 2px solid #15427e; */
+        /* height: auto; */
+    }
+
+    .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            /* border: 2px solid #0c0b0b; */
+        }
+
+        .controls .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .controls .circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .controls .circle img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .controls .circle:active {
+            animation: border-pulse 0.5s ease;
+        }
+
+        @keyframes border-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+            }
+            100% {
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+        }
+
+        .circle-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .circle-text {
+            font-size: 12px;
+            color: #333;
+            text-align: center;
+        }
+
+        .input-box{
+            height: 30px;
+            width: 80px;
+        }
+
+   
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <img src="Images/somfy1.jpeg" alt="Logo" class="logo">
+        <h1 class="title">Control dashboard</h1>
+        <div class="dropdown">
+            <button class="dropdown-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="newmotorchart.html" class="dropdown-link">
+                    <i class="fas fa-tachometer-alt"></i> Control Dashboard
+                </a>
+                <a href="controls.html" class="dropdown-link">
+                    <i class="fas fa-sliders-h"></i> Controls
+                </a>
+                <a href="logupdated.html" class="dropdown-link">
+                    <i class="fas fa-clipboard-list"></i> Logs
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container g-white rounded-lg shadow-lg mt-0 p-6 h-auto ">
+        <div id="dashboard" class="dashboard-grid"></div>
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        const controlData = [
+            {
+                floor: "Floor 1",
+                moco: "Moco 1",
+                status: "on",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 75 },
+                    { type: "up-down", label: "Control", value: "up" }
+                ]
+            },
+            {
+                floor: "Floor 1",
+                moco: "Moco 2",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 50 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 1",
+                moco: "Moco 3",
+                status: "on",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 25 },
+                    { type: "up-down", label: "Control", value: "up" }
+                ]
+            },
+            {
+                floor: "Floor 1",
+                moco: "Moco 4",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 0 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 5",
+                status: "on",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 60 },
+                    { type: "up-down", label: "Control", value: "up" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 6",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 20 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 6",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 20 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 6",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 20 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 6",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 20 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 6",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 20 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            },
+            {
+                floor: "Floor 2",
+                moco: "Moco 6",
+                status: "off",
+                controls: [
+                    { type: "percentage", label: "Curtain Position", value: 20 },
+                    { type: "up-down", label: "Control", value: "down" }
+                ]
+            }
+        ];
+
+        const itemsPerPage = 8;
+        let currentPage = 1;
+        const totalPages = Math.ceil(controlData.length / itemsPerPage);
+
+        function createControlCard(moco) {
+            const card = document.createElement('div');
+            card.className = 'control-card';
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'card-header';
+
+            const dropdowndiv = document.createElement('div');
+            dropdowndiv.className = 'card-dropdown';
+            
+            const motorInfo = document.createElement('div');
+            motorInfo.className = 'motor-info';
+            motorInfo.innerHTML = `
+                <i class="fa-regular fa-building"></i>
+                <h2>${moco.floor}</h2>
+                
+            `;
+            // <p>${moco.floor}</p>
+            header.appendChild(motorInfo);
+            // Dropdowns for Moco and Motor Selection
+            const dropdowns = document.createElement('div');
+            dropdowns.className = 'dropdowns';
+
+            // Moco Dropdown
+            const mocoDropdown = document.createElement('select');
+            mocoDropdown.className = 'moco-dropdown';
+            controlData.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = `Moco ${index + 1}`;
+                option.textContent = `Moco ${index + 1}`;
+                mocoDropdown.appendChild(option);
+            });
+
+            // Motor Dropdown
+            const motorDropdown = document.createElement('select');
+            motorDropdown.className = 'motor-dropdown';
+            // controlData.forEach((item, index) => {
+            for(let i = 1; i <= 6; i++) {
+                const option = document.createElement('option');
+                option.value = `Motor ${i}`;
+                option.textContent = `Motor ${i}`;
+                motorDropdown.appendChild(option);
+            }
+            // );
+            // Append dropdowns to the dropdowns container
+            dropdowns.appendChild(mocoDropdown);
+            dropdowns.appendChild(motorDropdown);
+
+            // Append dropdowns to motorInfo
+            dropdowndiv.appendChild(dropdowns);
+
+            const cards = document.createElement('div');
+            // cards.classList.add('card');
+            cards.innerHTML = `          
+                <div class="cards-cont">
+                    <div class="blind-container">
+                    <div class="slat" id="blinds"></div>
+                    ${createSlats(10,moco.controls[0].value)} <!-- Pass the position to createSlats -->
+                    ${adjustBlinds(moco.controls[0].value)} <!-- Pass the position to createSlats -->
+                </div>    
+                </div>
+            `;
+
+            // Progress bar
+            const progress = document.createElement('div');
+            progress.className = 'progress-container';
+            progress.innerHTML = `
+                <div style="margin-top: 0.5rem; text-align: center; font-size: 0.9rem;">
+                    Position: ${moco.controls[0].value}%
+                </div>
+            `;
+
+            const upButton = document.createElement('div');
+            upButton.className = 'circle';
+            upButton.innerHTML = `<img src="/Images/up-arrow.png" alt="Up">`;
+            upButton.addEventListener('click', () => {
+                slider.dispatchEvent(new Event('input'));
+            });
+
+            const downButton = document.createElement('div');
+            downButton.className = 'circle';
+            downButton.innerHTML = `<img src="/Images/arrow-down-sign-to-navigate.png" alt="Down">`;
+            downButton.addEventListener('click', () => {
+                slider.dispatchEvent(new Event('input'));
+            });
+
+            const startStopButton = document.createElement('div');
+            startStopButton.className = 'circle';
+            let isFullyOpen = false;
+            startStopButton.innerHTML = `
+                <div class="circle-content">
+                    <img src="${isFullyOpen ? '/Images/window (1).png' : '/Images/window (2).png'}" alt="Curtain State">
+                </div>
+            `;
+            startStopButton.addEventListener('click', () => {
+                isFullyOpen = !isFullyOpen;
+                startStopButton.innerHTML = `
+                    <div class="circle-content">
+                        <img src="${isFullyOpen ? '/Images/window (1).png' : '/Images/window (2).png'}" alt="Curtain State">
+                    </div>
+                `;
+                slider.dispatchEvent(new Event('input'));
+            });
+
+            const inputBox = document.createElement('input');
+            inputBox.type = 'number';
+            inputBox.min = 0;
+            inputBox.max = 100;
+            inputBox.placeholder = 'value(%)';
+            inputBox.className = 'p-2 border border-gray-300 rounded-md input-box';
+            inputBox.style.marginTop = '7px';
+
+            inputBox.style.fontStyle = 'italic';
+            inputBox.style.color = '#888';
+            inputBox.style.textAlign = 'center';
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'controls';
+            buttonContainer.style.display = 'flex'; // Use flexbox to align horizontally
+            buttonContainer.style.alignItems = 'center'; // Vertically align the items in the center
+
+            buttonContainer.style.gap = '10px';
+            buttonContainer.appendChild(upButton);
+            buttonContainer.appendChild(downButton);
+            buttonContainer.appendChild(startStopButton);
+            buttonContainer.appendChild(inputBox);
+
+            // Assembly
+            card.appendChild(header);
+            card.appendChild(dropdowndiv);
+            card.appendChild(cards);
+            card.appendChild(progress);
+            card.appendChild(buttonContainer);
+
+            return card;
+        }
+
+        function createSlats(slatCount, position) {
+        let slatsHTML = '';
+        for (let i = 0; i < slatCount; i++) {
+            // Set the height of each slat based on the position of the sub-motor
+            const slatHeight = (position / slatCount) + 'px'; // Adjust height based on position
+            slatsHTML += `<div class="slat" style="height: ${slatHeight}; bottom: ${i * (100 / slatCount)}%;"></div>`;
+        }
+        return slatsHTML; // Return the HTML string for slats
+    }
+
+    // Adjust the blinds based on the position
+    function adjustBlinds(position) {
+        let blindHTML = '';
+            const slatHeight = (position) + 'px'; // Adjust height based on position
+            blindHTML += `<div class="blind"></div>`;
+        
+        return blindHTML; // Return the HTML string for slats
+    }
+
+        function renderDashboard(page) {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '';
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            controlData.slice(start, end).forEach(moco => {
+                dashboard.appendChild(createControlCard(moco));
+            });
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderDashboard(currentPage);
+                    renderPagination();
+                }
+            });
+            pagination.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderDashboard(currentPage);
+                    renderPagination();
+                });
+                pagination.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderDashboard(currentPage);
+                    renderPagination();
+                }
+            });
+            pagination.appendChild(nextButton);
+        }
+
+        renderDashboard(currentPage);
+        renderPagination();
+    </script>
+</body>
+</html>

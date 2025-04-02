@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sensor Status</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico"> <!-- Favicon -->
+     <script type="text/javascript">
+        var require = {
+            paths: {
+                "nmodule": "/module",
+                "baja": "/module/bajaScript/rc/plugin/baja",
+                "bajaScript": "/module/bajaScript/rc",
+                "bajaux": "/module/bajaux/rc",
+                "lex": "/module/js/rc/lex/lexplugin",
+                "log": "/module/js/rc/log/logPlugin",
+                "css": "/module/js/com/tridium/js/ext/require/css",
+                "jquery": "/module/js/rc/jquery/jquery",
+                "Handlebars": "/module/js/rc/handlebars/handlebars",
+                "Promise": "/module/js/rc/bluebird/bluebird",
+                "hbs": "/module/js/rc/require-handlebars-plugin/hbs",
+                "i18nprecompile": "/module/js/rc/require-handlebars-plugin/hbs/i18nprecompile",
+                "json2": "/module/js/rc/require-handlebars-plugin/hbs/json2",
+                "underscore": "/module/js/rc/underscore/underscore",
+                "baja.comm.Batch": "/module/bajaScript/baja.comm.Batch",
+                "dialogs": '/module/js/rc/dialogs/dialogs.built.min'
+                // "baja!schedule:Schedule": "/module/bajaScript/rc/schedule/Schedule",
+            },
+            hbs: {
+                disableI18n: true
+            }
+        };
+        console.log("RequireJS paths set:", require);
+    </script>
+    <link rel="stylesheet" href="css/tailwind.css">
+    <link rel="stylesheet" href="fontawesome-free/css/all.min.css">
+     <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        /* Dropdown styles */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #4a5568;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f7fafc;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+        /* Card Styles */
+        .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        /* gap: 10px; */
+        margin-top: 10px;
+        /* height: auto; */
+    }
+
+    .card {
+        background: linear-gradient(135deg, #ffffff, #f9f9f9);
+        /* border: 1px solid #e0e0e0; */
+        border-radius: 15px;
+        padding: 10px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease-in-out;
+        height: auto;
+        margin: 0;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 {
+        font-size: 1.5rem;
+        margin: 0;
+        color: #000000;
+        /* margin-top: 0; */
+        padding-top: 0;
+    }
+
+    .card p {
+        font-size: 1rem;
+        color: #666;
+        margin: 5px 0;
+    }
+
+    /* Blind Container Styles */
+    /* .blind-container {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        background-color: #eee;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 15px 0;
+        border: 1px solid #ddd;
+    }
+
+    .blind {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: linear-gradient(135deg, #d1a15e, #b8860b);
+        transition: height 0.5s ease;
+    } */
+
+    .cards-cont{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.2rem;
+        /* border: 2px solid #15427e; */
+        /* height: auto; */
+    }
+
+    .card .blind-container {
+        position: relative;
+        width: 200px;
+        height: 140px;
+        background-color: #eee;
+        overflow: hidden;
+        /* border: 5px solid #0c0b0b; */
+        border-top: 5px solid #0c0b0b;
+        /* border-radius: 8px; */
+        /* margin-left: 50px; */
+    }
+
+    .blind{
+        position: absolute;
+        margin-left: 16px;
+        width: 85%;
+        height: 100%; /* Will change based on the motor position */
+        transition: all 0.5s ease;
+        background: url('Images/freepik__upload__35645.png');
+        background-size: cover;
+    }
+
+    .slat {
+        width: 100%;
+        height: 10px;
+        background-color: #d1a15e;
+        margin-bottom: 2px;
+    }
+
+    /* Pagination Styles */
+             /* Pagination styles */
+             .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #555;
+        }
+        .pagination .active {
+            background-color: #555;
+        }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* .card {
+        animation: fadeIn 0.5s ease-in-out;
+    } */
+
+    .alarm-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 25px;
+            background: url('https://img.icons8.com/ios-filled/50/ff0000/alarm.png') no-repeat center center;
+            background-size: contain;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .error-message {
+            color: rgb(232, 62, 62); /* Set the error message color to red */
+            font-weight: bold; /* Make the error message bold */
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            /* margin-top: 0.2rem; */
+            /* border: 2px solid #0c0b0b; */
+        }
+
+        .controls .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            /* margin-top: 5px; */
+        }
+
+        .controls .circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .controls .circle img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .controls .circle:active {
+            animation: border-pulse 0.5s ease;
+        }
+
+        @keyframes border-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+            }
+            100% {
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+        }
+
+        .circle-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .circle-text {
+            font-size: 12px;
+            color: #333;
+            text-align: center;
+        }
+
+        .input-box{
+            height: 40px;
+            width: 95px;
+        }
+
+        /* .card-header{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #0c0b0b;
+        } */
+        
+        .motorposerror{
+            display: flex;
+            /* align-items: center; */
+            justify-content: space-evenly;
+            margin-top: 0.2rem;
+            /* gap: 5px; */
+        }
+        /* .error{
+            text-align: center;
+            text-size-adjust: 10px;
+            text-justify: distribute;
+        } */
+        /* .moposition{
+            flex-wrap: nowrap;
+            /* width: 250px; 
+        } */
+        /* #cards-container{
+            border: 5px solid red;
+            margin: 0;
+            padding: 0;
+        } */
+        /* .cardscontainer{
+            /* margin: 0;
+            padding: 10px 20px; */
+            /* border: 2px solid #0c0b0b; 
+        } */
+</style>
+</head>
+<body class="bg-gray-100 pt-20 mt-0 pr-6 pl-6 pb-0 mb-0 overflow-y-auto"> <!-- Added h-screen to fill the viewport -->
+
+<div class="container-fluid">
+            <!-- Navbar -->
+        <nav class="bg-white navbar fixed top-0 left-0 right-0 shadow-sm p-2 m-0 z-10">
+            <div class="flex justify-between items-center">
+                <a class="flex items-center" href="#">
+                    <img src="Images/somfy1.jpeg" alt="Logo" class="h-8">
+                </a>
+                <h1 class="text-2xl font-bold">Motor Status And Control Dashboard</h1>
+                <!-- Dropdown Button -->
+                <div class="dropdown relative">
+                    <button id="dropdownButton" class="bg-white p-2 rounded-lg hover:bg-gray-50 focus:outline-none" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                    <div class="dropdown-content mt-2">
+                        <a href="../index.html">Main Dashboard</a>
+                        <a href="/public/mainMotorStatus.html">Motor Dashboard</a>
+                        <a href="/public/log.html">Log Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!-- <div class="container mx-auto"> -->
+        <!-- Dashboard Content -->
+            <div class="bg-white rounded-lg shadow-lg p-5 h-auto cardscontainer" > <!-- mt-0 p-6Adjusted height and added overflow-y-auto -->
+                <!-- <h1 id="motorId">Motor Dashboard</h1> -->
+                <div id="current-moco"></div>
+                <div id="cards-container"  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+                <div id="pagination" class="flex justify-center space-x-2 mt-3 mb-0"></div>
+            </div>
+        <!-- </div> -->
+        <footer class="text-center text-sm bottom-0 left-0 right-0 p-2 mb-0 z-10 mt-1 text-gray-600">
+            Designed And Developed By &copy Ked Technology
+        </footer>
+        </div>
+  <script src="file:^newxlsx.js"></script>
+<script type="text/javascript" 
+        data-main="/module/bajaScript/rc/plugin/baja" 
+        src="file:^rc/requireJs.js"></script>
+      
+      <script src="js/tailwind.js"></script>
+
+<script>
+// require([
+//   'baja!',
+//   'baja!control:NumericWritable',
+//   'baja!control:BooleanWritable'
+// ], function (
+//   baja,
+//   NumericWritable,
+//   BooleanWritable
+// ) {
+//   "use strict";
+//   console.log("Baja module loaded successfully");
+
+//   const sub = new baja.Subscriber();
+//   console.log("Subscriber created");
+
+//   function getFolderNames(parentPath) {
+//     console.log(`Starting getFolderNames for path: ${parentPath}`);
+//     return new Promise((resolve) => {
+//       console.log("Creating Ord object for parent path");
+//       baja.Ord.make(parentPath).get({ subscriber: sub })
+//         .then(parent => {
+//           console.log("Received parent object:", parent);
+//           if (!parent) {
+//             console.warn('Parent not found:', parentPath);
+//             resolve([]);
+//             return;
+//           }
+          
+//           console.log("Getting slots from parent");
+//           const slots = parent.getSlots()
+//             .properties()
+//             .isComponent()
+//             .toArray();
+            
+//           console.log("Slots retrieved:", slots);
+//           const names = slots.map(slot => slot.getName());
+//           console.log('Found folder names at', parentPath, ':', names);
+//           resolve(names);
+//         })
+//         .catch(err => {
+//           console.error('Error getting folder names from', parentPath, err);
+//           resolve([]);
+//         });
+//     });
+//   }
+
+//   async function initialize() {
+//     console.log("Initializing application...");
+//     try {
+//         const floorId = localStorage.getItem('selectedMotorId');
+//         const mocoId = localStorage.getItem('floorMocoId');
+//         console.log(`Retrieved from localStorage - floorId: ${floorId}, mocoId: ${mocoId}`);
+        
+//         if (!floorId || !mocoId) {
+//             console.error("Missing floorId or mocoId in localStorage");
+//             showError('No controller selected. Please go back and select a controller.');
+//             return;
+//         }
+
+//         const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+//         console.log('Attempting to access controller at path:', mocoPath);
+        
+//         console.log("Creating Ord object for mocoPath");
+//         const parent = await baja.Ord.make(mocoPath).get({ subscriber: sub });
+//         console.log("Parent object received:", parent);
+        
+//         if (!parent) {
+//             console.error(`Controller not found at path: ${mocoPath}`);
+//             showError(`Controller not found at path: ${mocoPath}`);
+//             return;
+//         }
+        
+//         console.log('Controller found, getting motors...');
+//         document.getElementById('current-moco').textContent = `Floor ${floorId} - Moco ${mocoId}`;
+        
+//         console.log("Calling getMotorsWithStatus");
+//         const motors = await getMotorsWithStatus(mocoPath);
+//         console.log("Motors retrieved:", motors);
+        
+//         if (motors.length === 0) {
+//             console.warn('No motors found at path:', mocoPath);
+//             showError('No motors found for this controller');
+//         }
+        
+//         console.log('Displaying motors:', motors);
+//         displayMotorCards(motors);
+        
+//     } catch (error) {
+//         console.error('Initialization failed:', error);
+//         console.error('Error stack:', error.stack);
+//         showError('Failed to load motor data. Please check the controller path and try again.');
+//     }
+//   }
+
+//   async function getMotorsWithStatus(mocoPath) {
+//     console.log(`Starting getMotorsWithStatus for path: ${mocoPath}`);
+//     try {
+//         console.log("Getting folder names...");
+//         const motorNames = await getFolderNames(mocoPath);
+//         console.log('Motor names found:', motorNames);
+        
+//         const motors = [];
+        
+//         for (const [index, motorName] of motorNames.entries()) {
+//             console.log(`Processing motor ${index + 1}/${motorNames.length}: ${motorName}`);
+//             const motorPath = `${mocoPath}/${motorName}`;
+//             console.log(`Checking motor at path: ${motorPath}`);
+            
+//             try {
+//                 console.log("Checking if path is a valid motor...");
+//                 const isMotorValid = await isMotor(motorPath);
+//                 console.log(`Is motor valid? ${isMotorValid}`);
+                
+//                 if (isMotorValid) {
+//                     console.log("Getting position value...");
+//                     const position = await getPointValue(`${motorPath}/position`);
+//                     if (position === null || position === undefined) {
+//                       console.warn(`No position value for motor ${motorName}`);
+//                       continue; // Skip this motor or set default value
+//                     }
+//                     console.log("Getting error value..." + position);
+//                         baja.Ord.make(errorPath).get({ subscriber: sub }).then((point) => {
+//                         console.log(`Fetched from ${errorPath}:`, point.getOutDisplay());
+                
+//                     }).catch((err) => console.error(`Error fetching ${errorPath}:`, err));
+//                     const error = await getPointValue(`${motorPath}/error`);
+//                     console.log(`Motor values - position: ${position}, error: ${error}`);
+                    
+//                     motors.push({
+//                         id: index + 1,
+//                         name: motorName,
+//                         position: position,
+//                         error: error ? "fault" : "No fault",
+//                         url: motorPath
+//                     });
+//                     console.log(`Motor ${motorName} added to list`);
+//                 }
+//             } catch (motorError) {
+//                 console.error(`Error processing motor ${motorName}:`, motorError);
+//                 console.error('Error stack:', motorError.stack);
+//             }
+//         }
+        
+//         console.log('Final motors array:', motors);
+//         return motors;
+//     } catch (error) {
+//         console.error('Error in getMotorsWithStatus:', error);
+//         console.error('Error stack:', error.stack);
+//         throw error;
+//     }
+//   }
+
+//   async function isMotor(path) {
+//     console.log(`Checking if path is a motor: ${path}`);
+//     try {
+//         console.log("Checking position point...");
+//         const positionExists = await pointExists(`${path}/position`);
+//         console.log("Checking error point...");
+//         const errorExists = await pointExists(`${path}/error`);
+//         console.log(`Position exists: ${positionExists}, Error exists: ${errorExists}`);
+        
+//         return positionExists && errorExists;
+//     } catch (error) {
+//         console.error('Error in isMotor:', error);
+//         console.error('Error stack:', error.stack);
+//         return false;
+//     }
+//   }
+
+//   async function pointExists(path) {
+//     console.log(`Checking if point exists: ${path}`);
+//     try {
+//         console.log("Creating Ord object...");
+//         const point = await baja.Ord.make(path).get({ subscriber: sub });
+//         console.log("Point object received:", point);
+        
+//         if (!point) {
+//             console.log("Point is null");
+//             return false;
+//         }
+        
+//         console.log("Checking point slots...");
+//         const hasOutSlot = point.getSlot('out') !== null;
+//         console.log(`Has out slot: ${hasOutSlot}`);
+        
+//         return hasOutSlot;
+//     } catch (error) {
+//         console.error('Error in pointExists:', error);
+//         if (error.message && error.message.includes("Slot doesn't exist")) {
+//             console.log("Slot doesn't exist error detected");
+//             return false;
+//         }
+//         console.error('Error stack:', error.stack);
+//         return false;
+//     }
+//   }
+
+//   async function getPointValue(path) {
+//     console.log(`Getting point value for: ${path}`);
+//     try {
+//         console.log("Creating Ord object...");
+//         const ord = baja.Ord.make(path);
+//         console.log("Ord object created:", ord);
+        
+//         if (!ord) {
+//             console.warn(`Invalid Ord for path: ${path}`);
+//             return null;
+//         }
+        
+//         console.log("Getting point...");
+//         const point = await ord.get({ subscriber: sub });
+//         console.log("Point object received:", point);
+        
+//         if (!point) {
+//             console.warn(`Point not found at ${path}`);
+//             return null;
+//         }
+        
+//         console.log("Getting out value...");
+//         const outValue = await point.get('out').get();
+//         console.log("Raw out value:", outValue);
+        
+//         if (!outValue) {
+//             console.warn("No out value available");
+//             return null;
+//         }
+        
+//         // Get the display value for the point
+//         const displayValue = point.getOutDisplay();
+//         console.log(`Display value: ${displayValue}`);
+        
+//         return displayValue;
+//     } catch (error) {
+//         console.error(`Error getting value from ${path}:`, error);
+//         console.error('Error stack:', error.stack);
+//         return null;
+//     }
+//   }
+  
+//   function displayMotorCards(motors) {
+//     console.log("Displaying motor cards...");
+//     const container = document.getElementById('cards-container');
+//     container.innerHTML = '';
+    
+//     if (!motors || motors.length === 0) {
+//       console.log("No motors to display");
+//       container.innerHTML = `
+//         <div class="text-center py-8 text-red-500">
+//           No motors found for this controller
+//         </div>
+//       `;
+//       return;
+//     }
+    
+//     console.log(`Creating cards for ${motors.length} motors`);
+//     motors.forEach(motor => {
+//       console.log(`Creating card for motor ${motor.id}`);
+//       const card = document.createElement('div');
+//       card.className = 'card';
+      
+//       card.innerHTML = `
+//         <h2>Motor ${motor.id}<span>${motor.error === "fault" ? `<div class="alarm-icon"></div>` : ''}</span></h2>
+//         <div class="cards-cont">
+//           <div class="blind-container">
+//             <div class="blind" style="height: ${100 - (motor.position || 0)}%"></div>
+//           </div>    
+//         </div>
+//         <div class="motorposerror">
+//           <p class="moposition">Position: ${motor.position || '--'}%</p>
+//           ${motor.error === "fault" ? `<p class="error"><span class="error-message">Error:</span> ${motor.error}</p>` : ''}     
+//         </div>
+//         <div class="controls">
+//           <div class="circle" onclick="moveMotor('${motor.url}', 'up')">
+//             <img src="/public/Images/up-arrow.png" alt="Up">
+//           </div>
+//           <div class="circle" onclick="moveMotor('${motor.url}', 'down')">
+//             <img src="/public/Images/arrow-down-sign-to-navigate.png" alt="Down">
+//           </div>
+//           <div class="circle" onclick="stopMotor('${motor.url}')">
+//             <div class="circle-content">
+//               <img src="/public/Images/window (2).png" alt="Stop">
+//             </div>
+//           </div>
+//           <input type="number" min="0" max="100" placeholder="value(%)" 
+//             class="p-2 border border-gray-300 rounded-md input-box" style="margin-top: 13px;"
+//             onchange="setMotorPosition('${motor.url}', this.value)">
+//         </div>
+//       `;
+      
+//       container.appendChild(card);
+//       console.log(`Card for motor ${motor.id} created and appended`);
+//     });
+//   }
+
+
+//   // Update the control functions to use proper action invocation
+//   window.moveMotor = async function(path, direction) {
+//     console.log(`Moving motor ${path} ${direction}`);
+//     try {
+//       const actionPath = `${path}/${direction}`;
+//       console.log(`Action path: ${actionPath}`);
+      
+//       console.log("Creating Ord object...");
+//       const point = await baja.Ord.make(actionPath).get({ subscriber: sub });
+//       console.log("Point object received:", point);
+      
+//       if (!point) {
+//         console.error("Control point not found");
+//         throw new Error('Control point not found');
+//       }
+      
+//       console.log("Invoking action...");
+//       // For simple actions that don't need parameters, we can just invoke with null
+//       await point.invoke({
+//         slot: 'out',
+//         value: null
+//       });
+//       console.log("Action invoked successfully");
+      
+//       showMessage(`Motor ${direction} command sent successfully`);
+      
+//       console.log("Scheduling refresh...");
+//       setTimeout(refreshMotorStatus, 1000);
+      
+//     } catch (error) {
+//       console.error('Error moving motor:', error);
+//       console.error('Error stack:', error.stack);
+//       showError(`Failed to move motor: ${error.message}`);
+//     }
+//   };
+
+//   window.stopMotor = async function(path) {
+//     console.log(`Stopping motor ${path}`);
+//     try {
+//       const actionPath = `${path}/openclose`;
+//       console.log(`Action path: ${actionPath}`);
+      
+//       console.log("Creating Ord object...");
+//       const point = await baja.Ord.make(actionPath).get({ subscriber: sub });
+//       console.log("Point object received:", point);
+      
+//       if (!point) {
+//         console.error("Control point not found");
+//         throw new Error('Control point not found');
+//       }
+      
+//       console.log("Invoking action...");
+//       await point.invoke({
+//         slot: 'out',
+//         value: null
+//       });
+//       console.log("Action invoked successfully");
+      
+//       showMessage('Motor stop command sent successfully');
+      
+//       console.log("Scheduling refresh...");
+//       setTimeout(refreshMotorStatus, 1000);
+      
+//     } catch (error) {
+//       console.error('Error stopping motor:', error);
+//       console.error('Error stack:', error.stack);
+//       showError(`Failed to stop motor: ${error.message}`);
+//     }
+//   };
+
+//   window.setMotorPosition = async function(path, position) {
+//     console.log(`Setting motor position for ${path} to ${position}`);
+//     position = parseInt(position);
+//     if (isNaN(position)) {
+//       console.error("Invalid position value");
+//       showError('Please enter a valid number');
+//       return;
+//     }
+    
+//     position = Math.max(0, Math.min(100, position));
+//     console.log(`Normalized position: ${position}`);
+    
+//     try {
+//       console.log("Creating Ord object for position point...");
+//       const point = await baja.Ord.make(`${path}/position`).get({ subscriber: sub });
+//       console.log("Point object received:", point);
+      
+//       if (!point) {
+//         console.error("Position point not found");
+//         throw new Error('Position point not found');
+//       }
+      
+//       console.log("Creating NumericOverride...");
+//       const override = baja.$('control:NumericOverride', {
+//         value: position,
+//         duration: baja.RelTime.make({ seconds: 0 }) // Immediate override
+//       });
+//       console.log("Override object created:", override);
+      
+//       console.log("Invoking override action...");
+//       await point.invoke({
+//         slot: 'override',
+//         value: override
+//       });
+//       console.log("Override action invoked successfully");
+      
+//       showMessage(`Position set to ${position}%`);
+      
+//       console.log("Scheduling refresh...");
+//       setTimeout(refreshMotorStatus, 1000);
+      
+//     } catch (error) {
+//       console.error('Error setting position:', error);
+//       console.error('Error stack:', error.stack);
+//       showError(`Failed to set position: ${error.message}`);
+//     }
+//   };
+
+//   async function refreshMotorStatus() {
+//     console.log("Refreshing motor status...");
+//     try {
+//       const floorId = localStorage.getItem('selectedMotorId');
+//       const mocoId = localStorage.getItem('floorMocoId');
+//       console.log(`Retrieved from localStorage - floorId: ${floorId}, mocoId: ${mocoId}`);
+      
+//       const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+//       console.log(`Refreshing path: ${mocoPath}`);
+      
+//       const motors = await getMotorsWithStatus(mocoPath);
+//       console.log("Motors retrieved for refresh:", motors);
+//       displayMotorCards(motors);
+//     } catch (error) {
+//       console.error('Error refreshing motor status:', error);
+//       console.error('Error stack:', error.stack);
+//     }
+//   }
+
+//   function showError(message) {
+//     console.error(`Showing error message: ${message}`);
+//     const alertElement = document.getElementById('alert-message');
+//     if (alertElement) {
+//       alertElement.textContent = message;
+//       alertElement.className = 'alert error';
+//       alertElement.style.display = 'block';
+//       setTimeout(() => { alertElement.style.display = 'none'; }, 5000);
+//     }
+//   }
+
+//   function showMessage(message) {
+//     console.log(`Showing success message: ${message}`);
+//     const alertElement = document.getElementById('alert-message');
+//     if (alertElement) {
+//       alertElement.textContent = message;
+//       alertElement.className = 'alert success';
+//       alertElement.style.display = 'block';
+//       setTimeout(() => { alertElement.style.display = 'none'; }, 3000);
+//     }
+//   }
+
+//   console.log("Starting application initialization");
+//   initialize();
+// });
+
+// require([
+//   'baja!',
+//   'baja!control:NumericOverride',
+//   'baja!control:BooleanOverride'
+// ], function (
+//   baja,
+//   NumericOverride,
+//   BooleanWritable
+// ) {
+//   "use strict";
+  
+//   const sub = new baja.Subscriber();
+//   function fetchLatestAlarm(mocoPath, motorName) {
+//     return new Promise((resolve, reject) => {
+//         console.log(`Checking alarms for ${mocoName}at path: ${mocoPath}`);
+        
+//         // Make the query specific to the full path
+//         var query = baja.Ord.make(
+//             `local:|fox:|alarm:|bql:select * where source like '%${motorName}%'`
+//         );
+
+//         query.get().then(function (table) {
+//             let alarms = [];
+//             let allSources = new Set();
+
+//             table.cursor({
+//                 each: function () {
+//                     const source = String(this.get("source"));
+//                     const alarmData = String(this.get("alarmData"));
+//                     const timestamp = new Date(this.get("timestamp"));
+
+//                     allSources.add(source);
+//                     console.log(`Found alarm source: ${source}`);
+
+//                     // Verify the source matches our complete path
+//                     if (source.includes(mocoPath)) {
+//                         const match = alarmData.match(/msgText=([^,]*)/);
+//                         if (match) {
+//                             alarms.push({
+//                                 source: source,
+//                                 message: match[1],
+//                                 timestamp: timestamp
+//                             });
+//                         }
+//                     }
+//                 }
+//             }).then(() => {
+//                 console.log(`All alarm sources for ${mocoPath}:`, Array.from(allSources));
+
+//                 // Get the latest alarm for this specific path
+//                 const latestAlarm = alarms.length > 0 
+//                     ? alarms.reduce((latest, alarm) => 
+//                         alarm.timestamp > latest.timestamp ? alarm : latest
+//                       ) 
+//                     : null;
+
+//                 if (latestAlarm) {
+//                     console.log(`Latest alarm for ${mocoName}:`, latestAlarm.message);
+//                 } else {
+//                     console.log(`No alarms found for ${mocoName}`);
+//                 }
+
+//                 resolve(latestAlarm);
+//             });
+//         }).catch(err => {
+//             console.error(`Alarm query failed for ${mocoName}:`, err);
+//             reject(err);
+//         });
+//     });
+// }
+  
+//   // Initialize the application
+//   async function initialize() {
+//     try {
+//       const floorId = localStorage.getItem('selectedMotorId');
+//       const mocoId = localStorage.getItem('floorMocoId');
+      
+//       if (!floorId || !mocoId) {
+//         showError('No controller selected. Please go back and select a controller.');
+//         return;
+//       }
+
+//       const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+//       document.getElementById('current-moco').textContent = `Floor ${floorId} - Moco ${mocoId}`;
+      
+//       const motors = await getMotorsWithStatus(mocoPath);
+//       displayMotorCards(motors);
+//     } catch (error) {
+//       console.error('Initialization failed:', error);
+//       showError('Failed to load motor data. Please check the controller path and try again.');
+//     }
+//   }
+
+//   // Get motors with their current status
+//   async function getMotorsWithStatus(mocoPath) {
+//     try {
+//       const motorNames = await getFolderNames(mocoPath);
+//       const motors = [];
+      
+//       for (const [index, motorName] of motorNames.entries()) {
+//         const motorPath = `${mocoPath}/${motorName}`;
+        
+//         try {
+//           // Check if it's a valid motor by looking for position point
+//           const positionExists = await pointExists(`${motorPath}/position`);
+          
+//           if (positionExists) {
+//             // Get current position
+//             const position = await getPointValue(`${motorPath}/position`);
+            
+//             // Get error status if available
+//             let error = "No fault";
+//             if (await pointExists(`${motorPath}/error`)) {
+//               const errorValue = await getPointValue(`${motorPath}/error`);
+//               error = errorValue ? "fault" : "No fault";
+//             }
+            
+//             motors.push({
+//               id: index + 1,
+//               name: motorName,
+//               position: position,
+//               error: error,
+//               path: motorPath
+//             });
+//           }
+//         } catch (motorError) {
+//           console.error(`Error processing motor ${motorName}:`, motorError);
+//         }
+//       }
+      
+//       return motors;
+//     } catch (error) {
+//       console.error('Error in getMotorsWithStatus:', error);
+//       throw error;
+//     }
+//   }
+
+//   // Helper function to get folder names
+//   function getFolderNames(parentPath) {
+//     return new Promise((resolve) => {
+//       baja.Ord.make(parentPath).get({ subscriber: sub })
+//         .then(parent => {
+//           if (!parent) {
+//             resolve([]);
+//             return;
+//           }
+          
+//           const slots = parent.getSlots()
+//             .properties()
+//             .isComponent()
+//             .toArray();
+            
+//           const names = slots.map(slot => slot.getName());
+//           resolve(names);
+//         })
+//         .catch(err => {
+//           console.error('Error getting folder names:', err);
+//           resolve([]);
+//         });
+//     });
+//   }
+
+//   // Check if a point exists
+//   // async function pointExists(path) {
+//   //   try {
+//   //     const point = await baja.Ord.make(path).get({ subscriber: sub });
+//   //     return point && point.getSlot('out') !== null;
+//   //   } catch (error) {
+//   //     if (error.message && error.message.includes("Slot doesn't exist")) {
+//   //       return false;
+//   //     }
+//   //     console.error('Error in pointExists:', error);
+//   //     return false;
+//   //   }
+//   // }
+
+//     async function pointExists(path) {
+//   try {
+//     const point = await baja.Ord.make(path).get({ subscriber: sub });
+//     return point && point.has('out'); // Use .has() to check for slot existence
+//   } catch (error) {
+//     console.error(`Error checking existence of ${path}:`, error);
+//     return false;
+//   }
+// }
+
+//   // Get a point's value
+//   // async function getPointValue(path) {
+//   //   try {
+//   //     const point = await baja.Ord.make(path).get({ subscriber: sub });
+//   //     if (!point) return null;
+      
+//   //     const outValue = await point.get('out').get();
+//   //     if (!outValue) return null;
+      
+//   //     return point.getOutDisplay();
+//   //   } catch (error) {
+//   //     console.error(`Error getting value from ${path}:`, error);
+//   //     return null;
+//   //   }
+//   // }
+  
+//   async function getPointValue(path) {
+//     try {
+//         console.log(`Fetching value from: ${path}`); // Debugging log
+
+//         // Ensure the ORD is valid
+//         const ord = baja.Ord.make(path);
+//         if (!ord) {
+//             console.error(`Invalid ORD: ${path}`);
+//             return null;
+//         }
+
+//         // Fetch the point data
+//         const point = await ord.get({ subscriber: sub });
+
+//         // Check if the point is valid
+//         if (!point) {
+//             console.warn(`No valid object found at: ${path}`);
+//             return null;
+//         }
+
+//         // Check if the 'out' slot exists
+//         if (!point.has('out')) {
+//             console.warn(`No 'out' slot found at: ${path}`);
+//             return null;
+//         }
+
+//         // Get the 'out' value
+//         const outValue = await point.get('out');
+//         if (!outValue) {
+//             console.warn(`No value in 'out' slot for: ${path}`);
+//             return null;
+//         }
+
+//         console.log(`Fetched value: ${outValue.getValue()}`);
+//         return outValue.getValue(); // Ensure we're getting the raw value
+
+//     } catch (error) {
+//         console.error(`Error getting value from ${path}:`, error);
+//         return null;
+//     }
+// }
+
+
+//   // Display motor cards in the UI
+//   function displayMotorCards(motors) {
+//     const container = document.getElementById('cards-container');
+//     container.innerHTML = '';
+    
+//     if (!motors || motors.length === 0) {
+//       container.innerHTML = '<div class="text-center py-8 text-red-500">No motors found for this controller</div>';
+//       return;
+//     }
+    
+//     motors.forEach(motor => {
+//       const card = document.createElement('div');
+//       card.className = 'card';
+      
+//       card.innerHTML = `
+//         <h2>Motor ${motor.id}${motor.error === "fault" ? '<div class="alarm-icon"></div>' : ''}</h2>
+//         <div class="cards-cont">
+//           <div class="blind-container">
+//             <div class="blind" style="height: ${100 - (motor.position || 0)}%"></div>
+//           </div>    
+//         </div>
+//         <div class="motorposerror">
+//           <p class="moposition">Position: ${motor.position || '--'}%</p>
+//           ${motor.error === "fault" ? '<p class="error"><span class="error-message">Error:</span> ${motor.error}</p>' : ''}     
+//         </div>
+//         <div class="controls">
+//           <div class="circle" onclick="moveMotor('${motor.path}', 'up')">
+//             <img src="/public/Images/up-arrow.png" alt="Up">
+//           </div>
+//           <div class="circle" onclick="moveMotor('${motor.path}', 'down')">
+//             <img src="/public/Images/arrow-down-sign-to-navigate.png" alt="Down">
+//           </div>
+//           <div class="circle" onclick="toggleMotor('${motor.path}')">
+//             <div class="circle-content">
+//               <img src="/public/Images/window (2).png" alt="Stop">
+//             </div>
+//           </div>
+//           <input type="number" min="0" max="100" placeholder="value(%)" 
+//             class="p-2 border border-gray-300 rounded-md input-box" style="margin-top: 13px;"
+//             onchange="setMotorPosition('${motor.path}', this.value)">
+//         </div>
+//       `;
+      
+//       container.appendChild(card);
+//     });
+//   }
+
+//   // Move motor up or down
+//   // window.moveMotor = async function(path, direction) {
+//   //   try {
+//   //     const actionPath = `${path}/${direction}`;
+//   //     const point = await baja.Ord.make(actionPath).get({ subscriber: sub });
+//   //     console.log("path for up and down " + point);
+      
+//   //     if (!point) {
+//   //       throw new Error('Control point not found');
+//   //     }
+      
+//   //     await point.invoke({
+//   //       slot: 'out',
+//   //       value: null
+//   //     });
+      
+//   //     showMessage(`Motor ${direction} command sent successfully`);
+//   //     setTimeout(refreshMotorStatus, 1000);
+//   //   } catch (error) {
+//   //     console.error('Error moving motor:', error);
+//   //     showError(`Failed to move motor: ${error.message}`);
+//   //   }
+//   // };
+  
+// // window.moveMotor = async function () {
+// //     try {
+// //         const ordPath = "station:|slot:/Drivers/somfy/maincontroller/Floor1/Moco1/motor1/up";
+// //         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+// //         if (!point) {
+// //             throw new Error("Control point not found");
+// //         }
+
+// //         // Ensure 'out' slot exists
+// //         if (!point.has("out")) {
+// //             throw new Error("No 'out' slot found on the given point.");
+// //         }
+
+// //         let currentValue = point.get("out").getValue();
+// //         console.log(`Current motor position: ${currentValue}%`);
+
+// //         // Increase or decrease by 5%
+// //         let newValue = currentValue + 5;
+// //         newValue = Math.max(0, Math.min(100, newValue)); // Keep within 0-100%
+
+// //         const override = baja.$("control:NumericOverride", {
+// //             value: newValue,
+// //             duration: baja.RelTime.make({ seconds: 0 }) // Immediate override
+// //         });
+
+// //         await point.invoke({
+// //             slot: "override",
+// //             value: override
+// //         });
+
+// //         showMessage(`Motor position updated to ${newValue}%`);
+// //         setTimeout(refreshMotorStatus, 1000);
+// //     } catch (error) {
+// //         console.error("Error moving motor:", error);
+// //         showError(`Failed to move motor: ${error.message}`);
+// //     }
+// // };
+
+
+// window.moveMotor = async function (path, direction) {
+//     try {
+//         // const ordPath = "station:|slot:/Drivers/somfy/maincontroller/Floor1/Moco1/motor1/up";
+//         const actionPath = `${path}/updown`;
+//         const point = await baja.Ord.make(actionPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Ensure 'out' slot exists
+//         if (!point.has("out")) {
+//             throw new Error("No 'out' slot found on the given point.");
+//         }
+
+//         let currentValue = point.get("out").getValue();
+//         console.log(`Current motor position: ${currentValue}%`);
+
+//         // Adjust value based on direction
+//         let newValue = direction === "up" ? currentValue - 5 : currentValue + 5;
+//         newValue = Math.max(0, Math.min(100, newValue)); // Ensure 0-100% range
+
+//         // Apply override
+//         const override = baja.$("control:NumericOverride", {
+//             value: newValue,
+//             duration: baja.RelTime.make({ seconds: 0 }) // Immediate override
+//         });
+
+//         await point.invoke({
+//             slot: "override",
+//             value: override
+//         });
+
+//         showMessage(`Motor position updated to ${newValue}%`);
+//         setTimeout(refreshMotorStatus, 1000);
+//     } catch (error) {
+//         console.error("Error moving motor:", error);
+//         showError(`Failed to move motor: ${error.message}`);
+//     }
+// };
+
+
+
+
+//   // Stop motor
+//   // window.stopMotor = async function(path) {
+//   //   try {
+//   //     const actionPath = `${path}/openclose`;
+//   //     const point = await baja.Ord.make(actionPath).get({ subscriber: sub });
+      
+//   //     if (!point) {
+//   //       throw new Error('Control point not found');
+//   //     }
+      
+//   //     const override = baja.$("control:BooleanOverride", {
+//   //       value: openclose,
+//   //       duration: baja.RelTime.make({ seconds: 0 }) // Immediate override
+//   //     });
+      
+//   //     await point.invoke({
+//   //       slot: 'out',
+//   //       value: null
+//   //     });
+      
+//   //     showMessage('Motor stop command sent successfully');
+//   //     setTimeout(refreshMotorStatus, 1000);
+//   //   } catch (error) {
+//   //     console.error('Error stopping motor:', error);
+//   //     showError(`Failed to stop motor: ${error.message}`);
+//   //   }
+//   // };
+  
+// // window.stopMotor = async function () {
+// //     try {
+// //         const ordPath = "station:|slot:/Drivers/somfy/maincontroller/Floor1/Moco1/motor1/openclose";
+// //         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+// //         if (!point) {
+// //             throw new Error("Control point not found");
+// //         }
+
+// //         // Debugging: Check available slots
+// //         console.log("Available Slots:", point.getSlots().toArray().map(slot => slot.getName()));
+
+// //         // Ensure the point has the expected override slot
+// //         if (!point.has("emergencyInactive")) {
+// //             throw new Error("The 'override' slot is not available on this point.");
+// //         }
+
+// //         // Create an override action
+// //         const override = baja.$("control:BooleanOverride", { 
+// //             value: false, // Set to false to stop
+// //             duration: baja.RelTime.make({ seconds: 0 }) // Immediate override
+// //         });
+
+// //         // Invoke the override action
+// //         await point.invoke({
+// //             slot: "emergencyInactive",
+// //             value: override
+// //         });
+// //         console.log("Motor stop command sent successfully");
+
+// //         showMessage("Motor stop command sent successfully");
+// //         setTimeout(refreshMotorStatus, 1000);
+
+// //     } catch (error) {
+// //         console.error("Error stopping motor:", error);
+// //         showError(`Failed to stop motor: ${error.message}`);
+// //     }
+// // };
+
+
+// window.toggleMotor = async function () {
+//     try {
+//         const ordPath = "station:|slot:/Drivers/somfy/maincontroller/Floor1/Moco1/motor1/openclose";
+//         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Get motor status before deciding action
+//         const motorStatus = await point.get("out").getValue(); // Assuming "out" provides current status
+
+//         console.log("Motor Status:", motorStatus);
+
+//         // Determine the action based on motor status
+//         const actionToInvoke = motorStatus ? "emergencyInactive" : "emergencyActive";
+
+//         if (!point.has(actionToInvoke)) {
+//             throw new Error(`The action '${actionToInvoke}' is not available on this point.`);
+//         }
+
+//         // Invoke the selected action
+//         await point.invoke(actionToInvoke);
+//         console.log(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+
+//         showMessage(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+//         setTimeout(refreshMotorStatus, 1000);
+
+//     } catch (error) {
+//         console.error("Error toggling motor:", error);
+//         showError(`Failed to toggle motor: ${error.message}`);
+//     }
+// };
+
+
+
+
+//   // Set motor to specific position
+//   window.setMotorPosition = async function(path, position) {
+//     position = parseInt(position);
+//     if (isNaN(position)) {
+//       showError('Please enter a valid number');
+//       return;
+//     }
+    
+//     position = Math.max(0, Math.min(100, position));
+    
+//     try {
+//       const point = await baja.Ord.make(`${path}/position`).get({ subscriber: sub });
+      
+//       if (!point) {
+//         throw new Error('Position point not found');
+//       }
+      
+//       const override = baja.$("control:NumericOverride", {
+//         value: position,
+//         duration: baja.RelTime.make({ seconds: 0 }) // Immediate override
+//       });
+      
+//       await point.invoke({
+//         slot: 'override',
+//         value: override
+//       });
+      
+//       showMessage(`Position set to ${position}%`);
+//       setTimeout(refreshMotorStatus, 1000);
+//     } catch (error) {
+//       console.error('Error setting position:', error);
+//       showError(`Failed to set position: ${error.message}`);
+//     }
+//   };
+
+//   // Refresh motor status
+//   async function refreshMotorStatus() {
+//     try {
+//       const floorId = localStorage.getItem('selectedMotorId');
+//       const mocoId = localStorage.getItem('floorMocoId');
+//       const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+//       const motors = await getMotorsWithStatus(mocoPath);
+//       displayMotorCards(motors);
+//     } catch (error) {
+//       console.error('Error refreshing motor status:', error);
+//     }
+//   }
+
+//   // UI helper functions
+//   function showError(message) {
+//     const alertElement = document.getElementById('alert-message');
+//     if (alertElement) {
+//       alertElement.textContent = message;
+//       alertElement.className = 'alert error';
+//       alertElement.style.display = 'block';
+//       setTimeout(() => { alertElement.style.display = 'none'; }, 5000);
+//     }
+//   }
+
+//   function showMessage(message) {
+//     const alertElement = document.getElementById('alert-message');
+//     if (alertElement) {
+//       alertElement.textContent = message;
+//       alertElement.className = 'alert success';
+//       alertElement.style.display = 'block';
+//       setTimeout(() => { alertElement.style.display = 'none'; }, 3000);
+//     }
+//   }
+
+//   // Start the application
+//   initialize();
+// });
+
+require([
+  'baja!',
+  'baja!control:NumericOverride',
+  'baja!control:BooleanOverride'
+], function (
+  baja,
+  NumericOverride,
+  BooleanOverride
+) {
+  "use strict";
+  
+  const sub = new baja.Subscriber();
+  
+  function fetchLatestAlarm(mocoPath, motorName) {
+    return new Promise((resolve, reject) => {
+        console.log(`Checking alarms for ${motorName} at path: ${mocoPath}`);
+        
+        // Make the query specific to the full path
+        var query = baja.Ord.make(
+            `local:|fox:|alarm:|bql:select * where source like '%${motorName}%'`
+        );
+
+        query.get().then(function (table) {
+            let alarms = [];
+            let allSources = new Set();
+
+            table.cursor({
+                each: function () {
+                    const source = String(this.get("source"));
+                    const alarmData = String(this.get("alarmData"));
+                    const timestamp = new Date(this.get("timestamp"));
+
+                    allSources.add(source);
+                    console.log(`Found alarm source: ${source}`);
+
+                    // Verify the source matches our complete path
+                    if (source.includes(mocoPath)) {
+                        const match = alarmData.match(/msgText=([^,]*)/);
+                        if (match) {
+                            alarms.push({
+                                source: source,
+                                message: match[1],
+                                timestamp: timestamp
+                            });
+                        }
+                    }
+                }
+            }).then(() => {
+                console.log(`All alarm sources for ${mocoPath}:`, Array.from(allSources));
+
+                // Get the latest alarm for this specific path
+                const latestAlarm = alarms.length > 0 
+                    ? alarms.reduce((latest, alarm) => 
+                        alarm.timestamp > latest.timestamp ? alarm : latest
+                      ) 
+                    : null;
+
+                if (latestAlarm) {
+                    console.log(`Latest alarm for ${motorName}:`, latestAlarm.message);
+                } else {
+                    console.log(`No alarms found for ${motorName}`);
+                }
+
+                resolve(latestAlarm);
+            });
+        }).catch(err => {
+            console.error(`Alarm query failed for ${motorName}:`, err);
+            reject(err);
+        });
+    });
+  }
+  
+  // Initialize the application
+  async function initialize() {
+    try {
+      const floorId = localStorage.getItem('selectedMotorId');
+      const mocoId = localStorage.getItem('floorMocoId');
+      
+      if (!floorId || !mocoId) {
+        showError('No controller selected. Please go back and select a controller.');
+        return;
+      }
+
+      const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+      document.getElementById('current-moco').textContent = `Floor ${floorId} - Moco ${mocoId}`;
+      
+      const motors = await getMotorsWithStatus(mocoPath);
+      displayMotorCards(motors);
+    } catch (error) {
+      console.error('Initialization failed:', error);
+      showError('Failed to load motor data. Please check the controller path and try again.');
+    }
+  }
+
+  // Get motors with their current status
+  // async function getMotorsWithStatus(mocoPath) {
+  //   try {
+  //     const motorNames = await getFolderNames(mocoPath);
+  //     const motors = [];
+      
+  //     for (const [index, motorName] of motorNames.entries()) {
+  //       const motorPath = `${mocoPath}/${motorName}`;
+        
+  //       try {
+  //         // Check if it's a valid motor by looking for position point
+  //         const positionExists = await pointExists(`${motorPath}/position`);
+          
+  //         if (positionExists) {
+  //           // Get current position
+  //           const position = await getPointValue(`${motorPath}/position`);
+            
+  //           // Get error status if available
+  //           let error = "No fault";
+  //           if (await pointExists(`${motorPath}/error`)) {
+  //             const errorValue = await getPointValue(`${motorPath}/error`);
+  //             error = errorValue ? "Fault" : "No fault";
+  //           }
+            
+  //           // Get latest alarm for this motor
+  //           const latestAlarm = await fetchLatestAlarm(motorPath, motorName);
+            
+  //           motors.push({
+  //             id: index + 1,
+  //             name: motorName,
+  //             position: position,
+  //             error: error,
+  //             alarm: latestAlarm ? latestAlarm.message : null,
+  //             path: motorPath
+  //           });
+  //         }
+  //       } catch (motorError) {
+  //         console.error(`Error processing motor ${motorName}:`, motorError);
+  //       }
+  //     }
+      
+  //     return motors;
+  //   } catch (error) {
+  //     console.error('Error in getMotorsWithStatus:', error);
+  //     throw error;
+  //   }
+  // }
+//   async function getMotorsWithStatus(mocoPath) {
+//     try {
+//         const motorNames = await getFolderNames(mocoPath);
+//         const motors = [];
+        
+//         for (const [index, motorName] of motorNames.entries()) {
+//             const motorPath = `${mocoPath}/${motorName}`;
+            
+//             try {
+//                 // First check if position point exists and is accessible
+//                 const positionPath = `${motorPath}/position`;
+//                 if (!(await pointExists(positionPath))) {
+//                     console.log(`Skipping ${motorName} - position point does not exist`);
+//                     continue; // Skip this motor entirely
+//                 }
+
+//                 // Get current position
+//                 const position = await getPointValue(positionPath);
+//                 if (position === null) {
+//                     console.log(`Skipping ${motorName} - could not read position value`);
+//                     continue;
+//                 }
+
+//                 // Get error status if available
+//                 let error = "No fault";
+//                 const errorPath = `${motorPath}/error`;
+//                 if (await pointExists(errorPath)) {
+//                     const errorValue = await getPointValue(errorPath);
+//                     error = errorValue ? "Fault" : "No fault";
+//                 }
+                
+//                 // Get latest alarm for this motor
+//                 let latestAlarm = null;
+//                 try {
+//                     latestAlarm = await fetchLatestAlarm(motorPath, motorName);
+//                 } catch (alarmError) {
+//                     console.log(`Could not fetch alarms for ${motorName}:`, alarmError.message);
+//                 }
+                
+//                 // Only add motor if we successfully got position
+//                 motors.push({
+//                     id: index + 1,
+//                     name: motorName,
+//                     position: position,
+//                     error: error,
+//                     alarm: latestAlarm ? latestAlarm.message : null,
+//                     path: motorPath
+//                 });
+//             } catch (motorError) {
+//                 console.error(`Error processing motor ${motorName}:`, motorError.message);
+//                 continue; // Skip this motor on any error
+//             }
+//         }
+        
+//         return motors;
+//     } catch (error) {
+//         console.error('Error in getMotorsWithStatus:', error);
+//         throw error;
+//     }
+// }
+
+async function getMotorsWithStatus(mocoPath) {
+  try {
+    const motorNames = await getFolderNames(mocoPath);
+    const motors = [];
+    let validMotorCount = 0; // Counter for valid motors only
+    
+    for (const motorName of motorNames) {
+      const motorPath = `${mocoPath}/${motorName}`;
+      
+      try {
+        // Skip mocofault as it's not a real motor
+        if (motorName.toLowerCase() === 'mocofault') {
+          console.log(`Skipping mocofault folder`);
+          continue;
+        }
+
+        // Check if position point exists and is accessible
+        const positionPath = `${motorPath}/position`;
+        if (!(await pointExists(positionPath))) {
+          console.log(`Skipping ${motorName} - position point does not exist`);
+          continue;
+        }
+
+        // Get current position
+        const position = await getPointValue(positionPath);
+        if (position === null) {
+          console.log(`Skipping ${motorName} - could not read position value`);
+          continue;
+        }
+
+        // Get error status if available
+        let error = "No fault";
+        const errorPath = `${motorPath}/error`;
+        if (await pointExists(errorPath)) {
+          const errorValue = await getPointValue(errorPath);
+          error = errorValue ? "Fault" : "No fault";
+        }
+        
+        // Get latest alarm for this motor
+        let latestAlarm = null;
+        try {
+          latestAlarm = await fetchLatestAlarm(motorPath, motorName);
+        } catch (alarmError) {
+          console.log(`Could not fetch alarms for ${motorName}:`, alarmError.message);
+        }
+        
+        // Only add motor if we successfully got position
+        validMotorCount++;
+        motors.push({
+          id: validMotorCount, // Use the valid motor count instead of index
+          name: motorName,
+          position: position,
+          error: error,
+          alarm: latestAlarm ? latestAlarm.message : null,
+          path: motorPath
+        });
+      } catch (motorError) {
+        console.error(`Error processing motor ${motorName}:`, motorError.message);
+        continue;
+      }
+    }
+    
+    return motors;
+  } catch (error) {
+    console.error('Error in getMotorsWithStatus:', error);
+    throw error;
+  }
+}
+
+  // Helper function to get folder names
+  function getFolderNames(parentPath) {
+    return new Promise((resolve, reject) => {
+      baja.Ord.make(parentPath).get({ subscriber: sub })
+        .then(parent => {
+          if (!parent) {
+            resolve([]);
+            return;
+          }
+          
+          const slots = parent.getSlots()
+            .properties()
+            .isComponent()
+            .toArray();
+            
+          const names = slots.map(slot => slot.getName());
+          resolve(names);
+        })
+        .catch(err => {
+          console.error('Error getting folder names:', err);
+          reject(err);
+        });
+    });
+  }
+
+  // Check if a point exists
+async function pointExists(path) {
+    try {
+        const point = await baja.Ord.make(path).get({ subscriber: sub });
+        return point && point.has('out');
+    } catch (error) {
+        // Specifically handle "Slot doesn't exist" errors
+        if (error.message && error.message.includes("Slot doesn't exist")) {
+            console.log(`Point ${path} does not exist`);
+            return false;
+        }
+        console.error(`Error checking existence of ${path}:`, error);
+        return false;
+    }
+}
+
+  // Get a point's value
+  async function getPointValue(path) {
+    try {
+      console.log(`Fetching value from: ${path}`);
+      const ord = baja.Ord.make(path);
+      if (!ord) {
+        console.error(`Invalid ORD: ${path}`);
+        return null;
+      }
+
+      const point = await ord.get({ subscriber: sub });
+      if (!point) {
+        console.warn(`No valid object found at: ${path}`);
+        return null;
+      }
+
+      if (!point.has('out')) {
+        console.warn(`No 'out' slot found at: ${path}`);
+        return null;
+      }
+
+      const outValue = await point.get('out');
+      if (!outValue) {
+        console.warn(`No value in 'out' slot for: ${path}`);
+        return null;
+      }
+
+      console.log(`Fetched value: ${outValue.getValue()}`);
+      return outValue.getValue();
+    } catch (error) {
+      console.error(`Error getting value from ${path}:`, error);
+      return null;
+    }
+  }
+
+  // Display motor cards in the UI
+  // function displayMotorCards(motors) {
+  //   const container = document.getElementById('cards-container');
+  //   container.innerHTML = '';
+    
+  //   if (!motors || motors.length === 0) {
+  //     container.innerHTML = '<div class="text-center py-8 text-red-500">No motors found for this controller</div>';
+  //     return;
+  //   }
+    
+  //   motors.forEach(motor => {
+  //     const card = document.createElement('div');
+  //     card.className = 'card';
+      
+  //     card.innerHTML = `
+  //       <h2>Motor ${motor.id}${motor.error === "Fault" ? '<div class="alarm-icon"></div>' : ''}</h2>
+  //       <div class="cards-cont">
+  //         <div class="blind-container">
+  //           <div class="blind" style="height: ${100 - (motor.position || 0)}%"></div>
+  //         </div>    
+  //       </div>
+  //       <div class="motorposerror">
+  //         <p class="moposition">Position: ${motor.position !== null && motor.position !== undefined ? motor.position : '--'}%</p>
+  //         ${motor.error === "Fault" ? `<p class="error"><span class="error-message">Error:</span> ${motor.error}</p>` : ''}
+  //         ${motor.alarm ? `<p class="alarm">Alarm: ${motor.alarm}</p>` : ''}     
+  //       </div>
+  //       <div class="controls">
+  //         <div class="circle" onclick="moveMotor('${motor.path}', 'up')">
+  //           <img src="/public/Images/up-arrow.png" alt="Up">
+  //         </div>
+  //         <div class="circle" onclick="moveMotor('${motor.path}', 'down')">
+  //           <img src="/public/Images/arrow-down-sign-to-navigate.png" alt="Down">
+  //         </div>
+  //         <div class="circle" onclick="toggleMotor('${motor.path}')">
+  //           <div class="circle-content">
+  //             <img src="/public/Images/window (2).png" alt="Stop">
+  //           </div>
+  //         </div>
+  //         <input type="number" min="0" max="100" placeholder="value(%)" 
+  //           class="p-2 border border-gray-300 rounded-md input-box" style="margin-top: 13px;"
+  //           onchange="setMotorPosition('${motor.path}', this.value)">
+  //       </div>
+  //     `;
+      
+  //     container.appendChild(card);
+  //   });
+  // }
+  
+      // Initialize pagination
+    let currentPage = 1;
+    const itemsPerPage = 8;
+
+    function displayMotorCards(motors) {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = '';
+    
+    if (!motors || motors.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-red-500">No motors found for this controller</div>';
+        return;
+    }
+    
+    // Initialize pagination
+    let currentPage = 1;
+    const itemsPerPage = 8;
+    const totalPages = Math.ceil(motors.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const currentMotors = motors.slice(start, end);
+
+    currentMotors.forEach(motor => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        // Create slats HTML based on motor position
+        const slatsHTML = createSlats(10, motor.position);
+        const blindHTML = adjustBlinds(motor.position);
+        
+        card.innerHTML = `
+            <h2>Motor ${motor.id}${motor.error === "Fault" ? '<div class="alarm-icon"></div>' : ''}</h2>
+            <div class="cards-cont">
+                <div class="blind-container">
+                        <div class="slat" id="blinds"></div>
+                        ${createSlats(10,motor.position)} <!-- Pass the position to createSlats -->
+                        ${adjustBlinds(motor.position)} <!-- Pass the position to createSlats -->
+                </div>     
+            </div>
+            <div class="motorposerror">
+                <p class="moposition">Position: ${motor.position !== null && motor.position !== undefined ? motor.position : '--'}%</p>
+                ${motor.error === "Fault" ? `<p class="error"><span class="error-message">Error:</span> ${motor.error}</p>` : ''}
+                ${motor.alarm ? `<p class="alarm">Alarm: ${motor.alarm}</p>` : ''}     
+            </div>
+        `;
+
+        // Create control buttons
+        const upButton = document.createElement('div');
+        upButton.className = 'circle';
+        upButton.innerHTML = '<img src="Images/up-arrow.png" alt="Up">';
+        upButton.onclick = () => moveMotor(motor.path, 'up');
+
+        const downButton = document.createElement('div');
+        downButton.className = 'circle';
+        downButton.innerHTML = '<img src="Images/arrow-down-sign-to-navigate.png" alt="Down">';
+        downButton.onclick = () => moveMotor(motor.path, 'down');
+
+
+const startStopButton = document.createElement('div');
+startStopButton.className = 'circle';
+startStopButton.id = `${motor.path}-start-stop-button`; // Use motor path as a unique id
+startStopButton.innerHTML = `
+    <div class="circle-content">
+        <img src="Images/window (2).png" alt="Curtain State">
+    </div>
+`;
+startStopButton.addEventListener('click', () => toggleMotor(motor.path));
+
+
+// startStopButton.addEventListener('click', async (path) => {
+//     try {
+//         const ordPath = "station:|slot:/Drivers/somfy/maincontroller/Floor1/Moco1/motor1/openclose";
+//         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Get motor status from the point
+//         const motorStatus = await point.get("out").getValue(); // Assuming "out" provides current status
+//         console.log("Motor Status:", motorStatus);
+
+//         // Toggle motor based on current status
+//         const actionToInvoke = motorStatus ? "emergencyInactive" : "emergencyActive";
+
+//         if (!point.has(actionToInvoke)) {
+//             throw new Error(`The action '${actionToInvoke}' is not available on this point.`);
+//         }
+
+//         // Invoke the selected action to toggle motor
+//         await point.invoke(actionToInvoke);
+//         console.log(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+
+//         // After toggling, update the button state
+//         updateButtonState();
+
+//         showMessage(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+//     } catch (error) {
+//         console.error("Error toggling motor:", error);
+//         showError(`Failed to toggle motor: ${error.message}`);
+//     }
+// });
+
+
+
+        const inputBox = document.createElement('input');
+        inputBox.type = 'number';
+        inputBox.min = 0;
+        inputBox.max = 100;
+        inputBox.placeholder = 'value(%)';
+        inputBox.className = 'p-2 border border-gray-300 rounded-md input-box';
+        inputBox.style.marginTop = '13px';
+        inputBox.style.fontStyle = 'italic';
+        inputBox.style.color = '#888';
+        inputBox.style.textAlign = 'center';
+        inputBox.addEventListener('change', (e) => setMotorPosition(motor.path, e.target.value));
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'controls';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.alignItems = 'center';
+        buttonContainer.style.gap = '10px';
+        
+        buttonContainer.appendChild(upButton);
+        buttonContainer.appendChild(downButton);
+        buttonContainer.appendChild(startStopButton);
+        buttonContainer.appendChild(inputBox);
+        
+        card.appendChild(buttonContainer);
+        container.appendChild(card);
+    });
+
+    // Add pagination if needed
+    if (totalPages > 1) {
+        updatePagination(totalPages);
+    }
+}
+
+// async function updateButtonState(path) {
+//     try {
+//         const ordPath = `${path}/openclose`;
+//         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Get motor status from the point
+//         const motorStatus = await point.get("out").getValue(); // Assuming "out" provides current status
+//         console.log("Motor Status:", motorStatus);
+
+//         // Update button image based on motor status
+//         const startStopButton = document.getElementById(`${path}-start-stop-button`); // Use a unique id for the button
+//         if (startStopButton) {
+//             startStopButton.innerHTML = `
+//                 <div class="circle-content">
+//                     <img src="${motorStatus ? 'Images/window (1).png' : 'Images/window (2).png'}" alt="Curtain State">
+//                 </div>
+//             `;
+//         }
+//     } catch (error) {
+//         console.error("Error fetching motor status:", error);
+//     }
+// }
+
+async function updateButtonState(path) {
+    try {
+        const ordPath = `${path}/openclose`;
+        const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+        if (!point) {
+            throw new Error("Control point not found");
+        }
+
+        // Use the local state instead of fetching the motor status again
+        const motorStatus = motorState[path] ?? (await point.get("out").getValue());
+
+        console.log("Motor Status for Button Update:", motorStatus);
+
+        // Update the button image based on the local motor state
+        const startStopButton = document.getElementById(`${path}-start-stop-button`);
+        if (startStopButton) {
+            startStopButton.innerHTML = `
+                <div class="circle-content">
+                    <img src="${motorStatus ? 'Images/window (1).png' : 'Images/window (2).png'}" alt="Curtain State">
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error("Error updating button state:", error);
+    }
+}
+
+
+  function createSlats(slatCount, position) {
+        let slatsHTML = '';
+        for (let i = 0; i < slatCount; i++) {
+            // Set the height of each slat based on the position of the sub-motor
+            const slatHeight = (position / slatCount) + 'px'; // Adjust height based on position
+            slatsHTML += `<div class="slat" style="height: ${slatHeight}; bottom: ${i * (100 / slatCount)}%;"></div>`;
+        }
+        return slatsHTML; // Return the HTML string for slats
+    }
+
+    // Adjust the blinds based on the position
+    function adjustBlinds(position) {
+        let blindHTML = '';
+            const slatHeight = (position) + 'px'; // Adjust height based on position
+            blindHTML += `<div class="blind"></div>`;
+        
+        return blindHTML; // Return the HTML string for slats
+    }
+
+
+function updatePagination(totalPages) {
+    const paginationContainer = document.createElement('div');
+    paginationContainer.id = 'pagination';
+    paginationContainer.style.display = 'flex';
+    paginationContainer.style.justifyContent = 'center';
+    paginationContainer.style.marginTop = '20px';
+    paginationContainer.style.gap = '5px';
+
+    const prevButton = document.createElement('button');
+    prevButton.innerText = 'Previous';
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            refreshMotorStatus();
+        }
+    });
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.innerText = i;
+        if (i === currentPage) {
+            pageButton.style.backgroundColor = '#4CAF50';
+            pageButton.style.color = 'white';
+        }
+        pageButton.addEventListener('click', () => {
+            currentPage = i;
+            refreshMotorStatus();
+        });
+        paginationContainer.appendChild(pageButton);
+    }
+
+    const nextButton = document.createElement('button');
+    nextButton.innerText = 'Next';
+    nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            refreshMotorStatus();
+        }
+    });
+
+    document.getElementById('cards-container').appendChild(paginationContainer);
+}
+
+    // function createSlats(slatCount, position) {
+    //     let slatsHTML = '';
+    //     for (let i = 0; i < slatCount; i++) {
+    //         // Set the height of each slat based on the position of the sub-motor
+    //         const slatHeight = (position / slatCount) + 'px'; // Adjust height based on position
+    //         slatsHTML += `<div class="slat" style="height: ${slatHeight}; bottom: ${i * (100 / slatCount)}%;"></div>`;
+    //     }
+    //     return slatsHTML; // Return the HTML string for slats
+    // }
+
+    // // Adjust the blinds based on the position
+    // function adjustBlinds(position) {
+    //     let blindHTML = '';
+    //         const slatHeight = (position) + 'px'; // Adjust height based on position
+    //         blindHTML += `<div class="blind"></div>`;
+        
+    //     return blindHTML; // Return the HTML string for slats
+    // }
+    
+    // function updatePagination(totalPages) {
+    //         const paginationContainer = document.getElementById('pagination');
+    //         paginationContainer.innerHTML = '';
+
+    //         const prevButton = document.createElement('button');
+    //         prevButton.innerText = 'Previous';
+    //         prevButton.disabled = currentPage === 1;
+    //         prevButton.addEventListener('click', () => {
+    //             if (currentPage > 1) {
+    //                 currentPage--;
+    //                 displayCards();
+    //             }
+    //         });
+    //         paginationContainer.appendChild(prevButton);
+
+    //         for (let i = 1; i <= totalPages; i++) {
+    //             const pageButton = document.createElement('button');
+    //             pageButton.innerText = i;
+    //             pageButton.classList.toggle('bg-gray-500', i === currentPage);
+    //             pageButton.addEventListener('click', () => {
+    //                 currentPage = i;
+    //                 displayCards();
+    //             });
+    //             paginationContainer.appendChild(pageButton);
+    //         }
+
+    //         const nextButton = document.createElement('button');
+    //         nextButton.innerText = 'Next';
+    //         nextButton.disabled = currentPage === totalPages;
+    //         nextButton.addEventListener('click', () => {
+    //             if (currentPage < totalPages) {
+    //                 currentPage++;
+    //                 displayCards();
+    //             }
+    //         });
+    //         paginationContainer.appendChild(nextButton);
+    //     }
+
+
+  // Move motor up or down
+  window.moveMotor = async function(path, direction) {
+    try {
+      const actionPath = `${path}/position`;
+      const point = await baja.Ord.make(actionPath).get({ subscriber: sub });
+
+      if (!point) {
+        throw new Error('Position point not found');
+      }
+
+      if (!point.has('out')) {
+        throw new Error('No output slot found');
+      }
+
+      let currentValue = await getPointValue(actionPath) || 0;
+      let newValue = direction === 'up' ? Math.max(0, currentValue - 5) : Math.min(100, currentValue + 5);
+
+      const override = baja.$("control:NumericOverride", {
+        value: newValue,
+        duration: baja.RelTime.make({ seconds: 0 })
+      });
+
+      await point.invoke({
+        slot: 'override',
+        value: override
+      });
+
+      showMessage(`Motor moved ${direction} to ${newValue}%`);
+      //setTimeout(refreshMotorStatus, 1000);
+      setInterval(refreshMotorStatus, 1000);
+    } catch (error) {
+      console.error('Error moving motor:', error);
+      showError(`Failed to move motor: ${error.message}`);
+    }
+  };
+
+  // Toggle motor (open/close)
+// window.toggleMotor = async function (path) {
+//     try {
+//         const ordPath = `${path}/openclose`;
+//         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Get motor status before deciding action
+//         const motorStatus = await point.get("out").getValue(); // Assuming "out" provides current status
+
+//         console.log("Motor Status:", motorStatus);
+
+//         // Determine the action based on motor status
+//         const actionToInvoke = motorStatus ? "emergencyInactive" : "emergencyActive";
+
+//         if (!point.has(actionToInvoke)) {
+//             throw new Error(`The action '${actionToInvoke}' is not available on this point.`);
+//         }
+
+//         // Invoke the selected action
+//         await point.invoke(actionToInvoke);
+//         console.log(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+        
+//         updateButtonState(path);
+
+//         showMessage(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+//         setTimeout(refreshMotorStatus, 1000);
+
+//     } catch (error) {
+//         console.error("Error toggling motor:", error);
+//         showError(`Failed to toggle motor: ${error.message}`);
+//     }
+// };
+
+let motorState = {};  // Local storage for motor state
+
+// window.toggleMotor = async function (path) {
+//     try {
+//         const ordPath = `${path}/openclose`;
+//         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Get motor status before deciding action
+//         const motorStatus = await point.get("out").getValue(); // Assuming "out" provides current status
+
+//         console.log("Motor Status:", motorStatus);
+
+//         // Determine the action based on motor status
+//         const actionToInvoke = motorStatus ? "emergencyInactive" : "emergencyActive";
+
+//         if (!point.has(actionToInvoke)) {
+//             throw new Error(`The action '${actionToInvoke}' is not available on this point.`);
+//         }
+
+//         // Invoke the selected action to toggle the motor
+//         await point.invoke(actionToInvoke);
+//         console.log(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+
+//         // Update the local state to keep track of the current motor status
+//         motorState[path] = !motorStatus;
+
+//         // Update the button state based on the local state
+//         updateButtonState(path);
+
+//         // Show a success message after toggling
+//         showMessage(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+
+//     } catch (error) {
+//         console.error("Error toggling motor:", error);
+//         showError(`Failed to toggle motor: ${error.message}`);
+//     }
+// };
+
+// window.toggleMotor = async function (path) {
+//     try {
+//         const ordPath = `${path}/openclose`;
+//         const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+//         if (!point) {
+//             throw new Error("Control point not found");
+//         }
+
+//         // Get motor status before deciding action
+//         const motorStatus = await point.get("out").getValue(); // Assuming "out" provides current status
+
+//         console.log("Motor Status:", motorStatus);
+
+//         // Determine the action based on motor status
+//         const actionToInvoke = motorStatus ? "emergencyInactive" : "emergencyActive";
+
+//         if (!point.has(actionToInvoke)) {
+//             throw new Error(`The action '${actionToInvoke}' is not available on this point.`);
+//         }
+
+//         // Invoke the selected action to toggle the motor
+//         await point.invoke(actionToInvoke);
+//         console.log(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+
+//         // Update local state
+//         motorState[path] = !motorStatus;
+
+//         // Set position accordingly (0 if started, 100 if stopped)
+//         const newPosition = motorState[path] ? 0 : 100;
+//         await setMotorPosition(path, newPosition);
+
+//         // Update button state
+//         updateButtonState(path);
+        
+//         setInterval(refreshMotorStatus, 1000);
+//         // Show a success message after toggling
+//         showMessage(`Motor ${motorState[path] ? "started at 0%" : "stopped at 100%"} successfully`);
+
+//     } catch (error) {
+//         console.error("Error toggling motor:", error);
+//         showError(`Failed to toggle motor: ${error.message}`);
+//     }
+// };
+
+let refreshTimeout; // Global variable to store timeout ID
+
+window.toggleMotor = async function (path) {
+    try {
+        const ordPath = `${path}/openclose`;
+        const point = await baja.Ord.make(ordPath).get({ lease: true });
+
+        if (!point) {
+            throw new Error("Control point not found");
+        }
+
+        // Get motor status before deciding action
+        const motorStatus = await point.get("out").getValue();
+
+        console.log("Motor Status:", motorStatus);
+
+        // Determine the action based on motor status
+        const actionToInvoke = motorStatus ? "emergencyInactive" : "emergencyActive";
+
+        if (!point.has(actionToInvoke)) {
+            throw new Error(`The action '${actionToInvoke}' is not available on this point.`);
+        }
+
+        // Invoke the selected action to toggle the motor
+        await point.invoke(actionToInvoke);
+        console.log(`Motor ${motorStatus ? "stopped" : "started"} successfully`);
+
+        // Update local state
+        motorState[path] = !motorStatus;
+
+        // Set position accordingly (0 if started, 100 if stopped)
+        const newPosition = motorState[path] ? 0 : 100;
+        await setMotorPosition(path, newPosition);
+
+        // Update button state
+        updateButtonState(path);
+
+        // Clear previous timeout to prevent stacking
+        if (refreshTimeout) {
+            clearTimeout(refreshTimeout);
+        }
+
+        // Refresh **only once** after 1 second
+        refreshTimeout = setTimeout(refreshMotorStatus, 1000);
+
+        // Show a success message after toggling
+        showMessage(`Motor ${motorState[path] ? "started at 0%" : "stopped at 100%"} successfully`);
+
+    } catch (error) {
+        console.error("Error toggling motor:", error);
+        showError(`Failed to toggle motor: ${error.message}`);
+    }
+};
+
+
+// Function to set motor position
+async function setMotorPosition(path, position) {
+    position = parseInt(position);
+    if (isNaN(position)) {
+        showError('Please enter a valid number');
+        return;
+    }
+
+    position = Math.max(0, Math.min(100, position));
+
+    try {
+        const point = await baja.Ord.make(`${path}/position`).get({ lease: true });
+
+        if (!point) {
+            throw new Error('Position point not found');
+        }
+
+        if (!point.has('override')) {
+            throw new Error('No override slot found');
+        }
+
+        const override = baja.$("control:NumericOverride", {
+            value: position,
+            duration: baja.RelTime.make({ seconds: 0 })
+        });
+
+        await point.invoke({
+            slot: 'override',
+            value: override
+        });
+
+        console.log(`Position set to ${position}%`);
+        showMessage(`Position set to ${position}%`);
+        
+         if (refreshTimeout) {
+            clearTimeout(refreshTimeout);
+        }
+
+        // Refresh **only once** after 1 second
+        refreshTimeout = setTimeout(refreshMotorStatus, 1000);
+        
+        
+    } catch (error) {
+        console.error('Error setting position:', error);
+        showError(`Failed to set position: ${error.message}`);
+    }
+}
+
+
+
+
+  // Set motor to specific position
+  // window.setMotorPosition = async function(path, position) {
+  //   position = parseInt(position);
+  //   if (isNaN(position)) {
+  //     showError('Please enter a valid number');
+  //     return;
+  //   }
+    
+  //   position = Math.max(0, Math.min(100, position));
+    
+  //   try {
+  //     const point = await baja.Ord.make(`${path}/position`).get({ subscriber: sub });
+      
+  //     if (!point) {
+  //       throw new Error('Position point not found');
+  //     }
+      
+  //     if (!point.has('override')) {
+  //       throw new Error('No override slot found');
+  //     }
+      
+  //     const override = baja.$("control:NumericOverride", {
+  //       value: position,
+  //       duration: baja.RelTime.make({ seconds: 0 })
+  //     });
+      
+  //     await point.invoke({
+  //       slot: 'override',
+  //       value: override
+  //     });
+      
+  //     showMessage(`Position set to ${position}%`);
+  //     setTimeout(refreshMotorStatus, 1000);
+  //   } catch (error) {
+  //     console.error('Error setting position:', error);
+  //     showError(`Failed to set position: ${error.message}`);
+  //   }
+  // };
+
+  // Refresh motor status
+  // async function refreshMotorStatus() {
+  //   try {
+  //     const floorId = localStorage.getItem('selectedMotorId');
+  //     const mocoId = localStorage.getItem('floorMocoId');
+  //     const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+  //     const motors = await getMotorsWithStatus(mocoPath);
+  //     displayMotorCards(motors);
+  //   } catch (error) {
+  //     console.error('Error refreshing motor status:', error);
+  //   }
+  // }
+  
+  async function refreshMotorStatus() {
+    try {
+        // Disable animations if they are applied on the motor cards
+        const motorCards = document.querySelectorAll('.motor-card'); // Assuming your motor cards have this class
+        motorCards.forEach(card => {
+            card.style.transition = 'none';  // Temporarily disable transitions
+        });
+
+        // Get motor data and update UI
+        const floorId = localStorage.getItem('selectedMotorId');
+        const mocoId = localStorage.getItem('floorMocoId');
+        const mocoPath = `station:|slot:/Drivers/somfy/maincontroller/Floor${floorId}/Moco${mocoId}`;
+        const motors = await getMotorsWithStatus(mocoPath);
+
+        // Display motor cards
+        displayMotorCards(motors);
+
+        // Re-enable animations after the refresh
+        setTimeout(() => {
+            motorCards.forEach(card => {
+                card.style.transition = '';  // Restore original transition
+            });
+        }, 0); // Ensure the transition is restored immediately after update
+    } catch (error) {
+        console.error('Error refreshing motor status:', error);
+    }
+}
+
+
+  // UI helper functions
+  function showError(message) {
+    const alertElement = document.getElementById('alert-message');
+    if (alertElement) {
+      alertElement.textContent = message;
+      alertElement.className = 'alert error';
+      alertElement.style.display = 'block';
+      setTimeout(() => { alertElement.style.display = 'none'; }, 5000);
+    }
+  }
+
+  function showMessage(message) {
+    const alertElement = document.getElementById('alert-message');
+    if (alertElement) {
+      alertElement.textContent = message;
+      alertElement.className = 'alert success';
+      alertElement.style.display = 'block';
+      setTimeout(() => { alertElement.style.display = 'none'; }, 3000);
+    }
+  }
+
+  // Start the application
+  initialize();
+});
+</script>
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blinds Opening and Closing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .blind-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background-color: #eee;
+            overflow: hidden;
+            /* border: 5px solid #0c0b0b; */
+            border-top: 5px solid #0c0b0b;
+            /* border-radius: 8px; */
+        }
+
+        /* .blind {
+            position: absolute;
+            width: 100%;
+            background-color: #9e7d4e;
+            height: 100%; 
+            transition: all 0.5s ease;
+        } */
+
+        .blind {
+            position: absolute;
+            margin-left: 16px;
+            width: 85%;
+            height: 100%; /* Will change based on the motor position */
+            transition: all 0.5s ease;
+            background: url('/Images/freepik__upload__35645.png');
+            background-size: cover;
+        }
+
+        .slat {
+            width: 100%;
+            height: 10px;
+            background-color: #d1a15e;
+            margin-bottom: 2px;
+        }
+
+        .slider {
+            position: absolute;
+            bottom: 10px;
+            width: 80%;
+            left: 10%;
+            height: 10px;
+            background-color: #ccc;
+            border-radius: 5px;
+        }
+
+        .slider input {
+            width: 100%;
+            background-color: transparent;
+            outline: none;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="blind-container">
+        <div id="blind" class="blind">
+            <!-- Slats are added dynamically in JS -->
+        </div>
+        <div class="slider">
+            <input type="range" min="0" max="100" value="0" id="positionSlider">
+        </div>
+    </div>
+
+    <script>
+        const blind = document.getElementById('blind');
+        const slider = document.getElementById('positionSlider');
+
+        // Create slats for the blind
+        function createSlats(slatCount) {
+            for (let i = 0; i < slatCount; i++) {
+                const slat = document.createElement('div');
+                slat.classList.add('slat');
+                blind.appendChild(slat);
+            }
+        }
+
+        // Adjust the blinds based on the position
+        function adjustBlinds(position) {
+            const slats = blind.getElementsByClassName('slat');
+            const maxHeight = blind.offsetHeight;
+
+            for (let i = 0; i < slats.length; i++) {
+                const slatHeight = (maxHeight * (position / 100)) / slats.length;
+                slats[i].style.height = `${slatHeight}px`;
+            }
+        }
+
+        // Initialize with 10 slats
+        createSlats(10);
+
+        // Event listener for slider
+        slider.addEventListener('input', function () {
+            const position = slider.value;
+            adjustBlinds(position);
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Motor Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico"> <!-- Favicon -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .dashboard {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #4CAF50;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Card Styles */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff, #f9f9f9);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: #4CAF50;
+        }
+
+        .card p {
+            font-size: 1rem;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        /* Alarm Icon Styles */
+        .alarm-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: url('https://img.icons8.com/ios-filled/50/ff0000/alarm.png') no-repeat center center;
+            background-size: contain;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Blind Container Styles */
+        .blind-container {
+            position: relative;
+            width: 100%;
+            height: 150px; /* Adjust height as needed */
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+
+        .blind {
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            width: 100%;
+            background: linear-gradient(135deg, #d1a15e, #b8860b);
+            transition: height 0.5s ease;
+        }
+
+        .slat {
+            position: absolute; /* Position slats absolutely */
+            width: 100%;
+            height: 10px; /* Height of each slat */
+            background-color: #d1a15e; /* Color of the slat */
+            margin-bottom: 2px;
+        }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .pagination button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .pagination button:disabled {
+            background-color: #a5d6a7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pagination button.active {
+            background-color: #388e3c;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <h1 id="motorId">Motor Dashboard</h1>
+        <div id="cards-container" class="cards-container"></div>
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        // Get motor ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const motorId = urlParams.get('id');
+        document.getElementById('motorId').textContent = `Motor Dashboard - ${motorId}`;
+
+        // Mock data for sub-motors
+        const motorData = {
+            1: { subMotors: { subMotor1: { position: 30, error: "Fault occurred in the motor, please check." }, subMotor2: { position: 50, error: 1 }, subMotor3: { position: 80, error: 0 }, subMotor4: { position: 20, error: 1 }, subMotor5: { position: 60, error: 0 }, subMotor6: { position: 90, error: 0 } } },
+            2: { subMotors: { subMotor7: { position: 40, error: "Fault occurred in the motor, please check." }, subMotor8: { position: 70, error: '' }, subMotor9: { position: 10, error: '' }, subMotor10: { position: 90, error: 0 }, subMotor11: { position: 20, error: '' }, subMotor12: { position: 50, error: 0 } } },
+            3: { subMotors: { subMotor13: { position: 60, error: 0 }, subMotor14: { position: 80, error: 0 }, subMotor15: { position: 30, error: 1 }, subMotor16: { position: 50, error: 0 }, subMotor17: { position: 90, error: 0 }, subMotor18: { position: 20, error: 1 } } },
+        };
+
+        // Check if the motorId exists in motorData
+        if (!motorData[motorId]) {
+            document.getElementById('cards-container').innerHTML = `<p>No data available for Motor ID: ${motorId}</p>`;
+            return; // Exit if no data is found
+        }
+
+        // Initialize pagination
+        let currentPage = 1;
+        const itemsPerPage = 6;
+
+        function displayCards() {
+            const currentMotor = motorData[motorId];
+            const subMotorKeys = Object.keys(currentMotor.subMotors);
+            const totalPages = Math.ceil(subMotorKeys.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentSubMotors = subMotorKeys.slice(start, end);
+
+            const cardsContainer = document.getElementById('cards-container');
+            cardsContainer.innerHTML = '';
+
+            currentSubMotors.forEach(key => {
+                const subMotor = currentMotor.subMotors[key];
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <h2>${key}</h2>
+                    ${subMotor.error ? `<p>Error: ${subMotor.error}</p><div class="alarm-icon"></div>` : ''}
+                    <p>Position: ${subMotor.position}%</p>
+                    <div class="blind-container">
+                        <div class="blind" style="height: ${subMotor.position}%;"></div>
+                        ${createSlats(10, subMotor.position)} <!-- Pass the position to createSlats -->
+                    </div>
+                `;
+                card.onclick = () => {
+                    window.location.href = `curtainsstatus.html?id=${key}`; // Navigate to curtainsstatus.html with sub-motor ID
+                };
+                cardsContainer.appendChild(card);
+            });
+
+            updatePagination(totalPages);
+        }
+
+        function createSlats(slatCount, position) {
+            let slatsHTML = '';
+            for (let i = 0; i < slatCount; i++) {
+                // Set the height of each slat based on the position of the sub-motor
+                const slatHeight = (position / slatCount) + 'px'; // Adjust height based on position
+                slatsHTML += `<div class="slat" style="height: ${slatHeight}; bottom: ${i * (100 / slatCount)}%;"></div>`;
+            }
+            return slatsHTML; // Return the HTML string for slats
+        }
+
+        function updatePagination(totalPages) {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCards();
+                }
+            };
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    displayCards();
+                };
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayCards();
+                }
+            };
+            paginationContainer.appendChild(nextButton);
+        }
+
+        displayCards(); // Initialize the page
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Status</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card.fault {
+            background-color: #f0f4ff; /* Light blue for fault */
+            border-color: #3b82f6; /* Blue border */
+        }
+
+        .card.no-fault {
+            background-color: #e5e7eb; /* Light gray for no fault */
+            border-color: #9ca3af; /* Gray border */
+        }
+
+        .status-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .controller-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #4a5568;
+        }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #45a049;
+        }
+
+        .pagination .active {
+            background-color: #555;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #4a5568;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f7fafc;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-6 pt-24 h-screen">
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="bg-white navbar fixed top-0 left-0 right-0 shadow-sm p-2 mb-0 z-10">
+            <div class="container mx-auto flex justify-between items-center">
+                <a class="flex items-center" href="#">
+                    <img src="Images/somfy1.jpeg" alt="Logo" class="h-8">
+                </a>
+                <h1 class="text-2xl font-bold">Sensor Status Dashboard</h1>
+                <!-- Dropdown Button -->
+                <div class="dropdown relative">
+                    <button id="dropdownButton" class="bg-white p-2 rounded-lg hover:bg-gray-50 focus:outline-none" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                    <div id="dropdownContent" class="dropdown-content mt-2">
+                        <a href="newmotorchart.html">Motor Dashboard</a>
+                        <a href="controls.html">Control Dashboard</a>
+                        <a href="logupdated.html">Log Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="bg-white rounded-lg shadow-lg p-6 h-[calc(100vh-8rem)] overflow-none">
+            <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="pagination" class="flex justify-center space-x-2 mt-6"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript to Populate Data -->
+    <script>
+        const statusData = [
+            { floor: "Floor 1", moco: "Moco 1", mocoFault: "fault" },
+            { floor: "Floor 1", moco: "Moco 2", mocoFault: "No fault" },
+            { floor: "Floor 1", moco: "Moco 3", mocoFault: "No fault" },
+            { floor: "Floor 1", moco: "Moco 4", mocoFault: "fault" },
+            { floor: "Floor 1", moco: "Moco 5", mocoFault: "fault" },
+            { floor: "Floor 1", moco: "Moco 6", mocoFault: "fault" },
+            { floor: "Floor 1", moco: "Moco 7", mocoFault: "fault" },
+            { floor: "Floor 1", moco: "Moco 8", mocoFault: "fault" }
+        ];
+
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        const totalPages = Math.ceil(statusData.length / itemsPerPage);
+
+        const cardsContainer = document.getElementById('cards-container');
+        const paginationContainer = document.getElementById('pagination');
+        const dropdownButton = document.getElementById('dropdownButton');
+        const dropdownContent = document.getElementById('dropdownContent');
+
+        function displayCards() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentPageData = statusData.slice(start, end);
+
+            cardsContainer.innerHTML = '';
+
+            currentPageData.forEach((data) => {
+                const card = document.createElement('div');
+                card.classList.add('card', 'flex', 'flex-col', 'items-center', 'justify-center');
+
+                // Add class based on fault status
+                if (data.mocoFault === 'fault') {
+                    card.classList.add('fault');
+                } else {
+                    card.classList.add('no-fault');
+                }
+
+                const mocoIcon = data.mocoFault === 'fault'
+                    ? `<i class="fas fa-exclamation-circle text-blue-500 status-icon"></i>`
+                    : `<i class="fas fa-check-circle text-gray-500 status-icon"></i>`;
+
+                const controllerIcon = `<i class="fas fa-cogs controller-icon"></i>`; // Controller icon
+
+                card.innerHTML = `
+                    ${controllerIcon}
+                    <h1 class="text-xl font-extrabold mb-2 text-center">${data.moco}</h1>
+                    <h2 class="text-lg font-semibold mb-2">${data.floor} - ${data.moco}</h2>
+                    <p class="text-lg font-semibold flex items-center text-center"> 
+                        ${mocoIcon} Moco Status: 
+                        <span class="ml-2 text-${data.mocoFault === 'fault' ? 'blue' : 'gray'}-500">${data.mocoFault}</span>
+                    </p>   
+                `;
+                cardsContainer.appendChild(card);
+            });
+
+            updatePagination();
+        }
+
+        function updatePagination() {
+            paginationContainer.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCards();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.classList.toggle('bg-gray-500', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    displayCards();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayCards();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+        displayCards(); // Initialize the page
+
+        // Dropdown functionality
+        dropdownButton.addEventListener('click', () => {
+            dropdownContent.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!dropdownButton.contains(event.target) && !dropdownContent.contains(event.target)) {
+                dropdownContent.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+</html>

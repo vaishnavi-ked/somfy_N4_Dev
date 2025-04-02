@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Motor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .dashboard {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            transition: box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin: 10px 0;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #45a049;
+        }
+
+        .pagination .active {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <h1>Main Motor Dashboard</h1>
+        <div id="cards-container" class="cards-container"></div>
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        // Mock data for main motors
+        const motorData = [
+            { id: 1, name: "Main Motor 1", status: "fault", error: 2 },
+            { id: 2, name: "Main Motor 2", status: "no fault", error: 0 },
+            { id: 3, name: "Main Motor 3", status: "fault", error: 1 },
+            { id: 4, name: "Main Motor 4", status: "no fault", error: 0 },
+            { id: 5, name: "Main Motor 5", status: "fault", error: 3 },
+            { id: 6, name: "Main Motor 6", status: "no fault", error: 0 },
+            { id: 7, name: "Main Motor 7", status: "fault", error: 1 },
+            { id: 8, name: "Main Motor 8", status: "no fault", error: 0 },
+            { id: 9, name: "Main Motor 9", status: "fault", error: 2 },
+            { id: 10, name: "Main Motor 10", status: "no fault", error: 0 },
+        ];
+
+        // Initialize pagination
+        let currentPage = 1;
+        const itemsPerPage = 6;
+
+        function displayCards() {
+            const totalPages = Math.ceil(motorData.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentMotors = motorData.slice(start, end);
+
+            const cardsContainer = document.getElementById('cards-container');
+            cardsContainer.innerHTML = '';
+
+            currentMotors.forEach(motor => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <h2>${motor.name}</h2>
+                    <p>Status: ${motor.status}</p>
+                    <p>Error: ${motor.error}</p>
+                `;
+                card.onclick = () => {
+                    window.location.href = `finalmotorstatus.html?id=${motor.id}`; // Navigate to test.html with motor ID
+                };
+                cardsContainer.appendChild(card);
+            });
+
+            updatePagination(totalPages);
+        }
+
+        function updatePagination(totalPages) {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCards();
+                }
+            };
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    displayCards();
+                };
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayCards();
+                }
+            };
+            paginationContainer.appendChild(nextButton);
+        }
+
+        displayCards(); // Initialize the page
+    </script>
+</body>
+
+</html>

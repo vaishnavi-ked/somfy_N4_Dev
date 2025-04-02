@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .log-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .log-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon {
+            margin-right: 0.5rem;
+        }
+
+        .error-card {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+        }
+
+        .error-section {
+            background-color: #fff5f5;
+            border-left: 4px solid #ef4444;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .subtype-icon {
+            margin-right: 0.5rem;
+            color: #4b5563;
+        }
+
+        /* Dropdown Styles */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #333;
+            padding: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .dropdown-button:hover {
+            color: #3b82f6;
+        }
+
+                     /* Pagination styles */
+                     .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #555;
+        }
+        .pagination .active {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-4 sm:p-6">
+    <!-- Navbar -->
+    <div class="container-fluid">
+        <nav class="bg-white fixed top-0 left-0 right-0 shadow-md p-2 mb-0 z-10">
+            <div class="flex justify-between items-center">
+                <a class="flex items-center" href="#">
+                    <img src="Images/somfy1.jpeg" alt="Logo" class="h-8">
+                </a>
+                <h1 class="text-2xl font-bold">Log Status Dashboard</h1>
+                <div class="dropdown relative">
+                    <button id="dropdownButton" class="bg-white p-2 rounded-lg hover:bg-gray-50 focus:outline-none" aria-label="Toggle dropdown">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                    <div class="dropdown-content mt-2">
+                        <a href="../index.html">Main Dashboard</a>
+                        <a href="public/mainMotorStatus.html">Motor Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    
+        <!-- Main Content -->
+        <div class="mt-16 mb-2"> <!-- Added mt-16 to account for the fixed navbar -->
+            <!-- Log Cards -->
+            <!-- Log Cards -->
+            <div class="flex flex-wrap -mx-2 mb-1">
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <div class="border-l-4 border-blue-500 shadow-lg h-full bg-white rounded-lg">
+                        <div class="p-6 flex items-center justify-between">
+                            <div>
+                                <div class="text-xl font-semibold text-blue-600 uppercase tracking-wide">Energy Consumed</div>
+                                <div class="mt-2">
+                                    <span class="text-xl font-bold text-gray-800" id="roomTemp">0</span>
+                                    <span class="text-lg text-gray-600 ml-2">kWh</span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <img src="Images/Screenshot 2025-02-24 123108.png" alt="KWh Consumed" class="w-20 h-20 opacity-90">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <div class="border-l-4 border-green-500 shadow-lg h-full bg-white rounded-lg">
+                        <div class="p-6 flex items-center justify-between">
+                            <div>
+                                <div class="text-xl font-semibold text-green-600 uppercase tracking-wide">Energy Saved</div>
+                                <div class="mt-2">
+                                    <span class="text-xl font-bold text-gray-800">0</span>
+                                    <span class="text-lg text-gray-600 ml-2">kWh</span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <img src="Images/Screenshot 2025-02-24 123215.png" alt="Energy Saved" class="w-20 h-20 opacity-90">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+              
+            <div class="h-auto overflow-none mt-0">
+                <!-- Log cards will be dynamically generated here -->
+                 <div id="totalHiistoryCount" class="mt-0"></div>
+                 <div id="log-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                <div id="pagination" class="flex justify-center space-x-2 mt-3 mb-0"></div>
+            </div>
+        </div>
+    
+        <footer class="text-center text-sm bottom-0 left-0 right-0 p-2 mb-0 z-10 mt-2 text-gray-600">
+            Designed And Developed By &copy Ked Technology
+        </footer>
+    </div>
+
+    <script>
+        const logData = [
+            {
+                date: "2023-10-01",
+                time: "10:30 AM",
+                type:"Lux",
+                name:"Sensor",
+                subtype:"East",
+                error: "Lux sensor error",
+            },
+            {
+                date: "2023-10-05",
+                time: "11:00 AM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+
+            },
+            {
+                date: "2023-11-04",
+                time: "11:30 AM",
+                error: "error",
+                type:"Floor 2",
+                name:"Moco 1",
+                subtype:"Motor 5",
+            },
+            {
+                date: "2023-10-11",
+                time: "12:00 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 3",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-12-13",
+                time: "12:40 PM",
+                error: "Motor 4 error",
+                type:"Floor 2",
+                name:"Moco 2",
+                subtype:"Motor 4",
+            },
+            {
+                date: "2023-10-01",
+                time: "11:40 PM",
+                error: "Tempreature sensor error",
+                type:"Tempreature",
+                name:"Sensor",
+                subtype:"",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:50 PM",
+                error: "error",
+                type:"Floor 2",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "10:20 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:10 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "09:23 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:00 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:00 PM",
+                error: "Tempreature sensor error",
+                type:"Sensor",
+                name:"Tempreature",
+                subtype:"",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:00 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:00 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            },
+            {
+                date: "2023-10-01",
+                time: "12:00 PM",
+                error: "error",
+                type:"Floor 1",
+                name:"Moco 1",
+                subtype:"Motor 1",
+            }
+        ];
+console.log("log data  " +logData.length);
+        let currentPage = 1;
+    const itemsPerPage = 12;
+
+        const logContainer = document.getElementById('log-container');
+        const paginationContainer = document.getElementById('pagination');
+        const history = document.getElementById('totalHiistoryCount');
+        const totalHiistoryCount = logData.length;
+    const historyCount = document.createElement('div');
+    historyCount.className = 'mb-2 text-gray-500';
+    historyCount.textContent = `Total History: ${totalHiistoryCount}`;
+    history.appendChild(historyCount);
+       function displayCards(){
+        const filteredLogs = logData.filter(log => log.error !== "None");
+    const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const currentPageData = filteredLogs.slice(start, end);
+    
+        logContainer.innerHTML = '';
+      
+currentPageData.forEach(log => {
+    const card = document.createElement('div');
+    card.className = `log-card bg-white shadow-lg rounded-lg p-4 sm:p-6 transition-transform duration-300`; // Keep existing classes
+
+    // Add main error message
+    const errorDiv = document.createElement('div');
+    errorDiv.innerHTML = `
+        <div class="text-xl mb-1 text-gray-800 font-semibold">${log.type} ${log.name} ${log.subtype}</div>
+        <div class="text-red-600 mb-1">
+            <i class="fas fa-exclamation-triangle"></i> 
+            <strong>Error:</strong> ${log.error}
+        </div>
+        <div class="flex">
+            <div class="text-gray-500 mr-4">Date: ${log.date}</div>
+            <div class="text-gray-500">Time: ${log.time}</div>
+        </div>
+    `;
+    card.appendChild(errorDiv);
+
+    logContainer.appendChild(card);
+    updatePagination(totalPages);
+});
+       }
+        // Dropdown functionality
+        const dropdownButton = document.getElementById('dropdownButton');
+        const dropdownContent = document.querySelector('.dropdown-content');
+
+        dropdownButton.addEventListener('click', () => {
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!dropdownButton.contains(event.target) && !dropdownContent.contains(event.target)) {
+                dropdownContent.style.display = 'none';
+            }
+        });
+
+        function updatePagination(totalPages) {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCards();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.classList.toggle('bg-gray-500', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    displayCards();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayCards();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+        displayCards();
+    </script>
+</body>
+
+</html>

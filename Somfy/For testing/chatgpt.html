@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabbed Interface</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+
+    <style>
+        .status-normal { background-color: #d4edda; }
+        .status-fault { background-color: #f8d7da; }
+        .status-warning { background-color: #fff3cd; }
+        .fade-in { animation: fadeIn 1s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <ul class="nav nav-tabs" id="tabMenu">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#floors"><i class="fas fa-building"></i> Floors</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#controllers"><i class="fas fa-microchip"></i> Controllers</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#motors"><i class="fas fa-cogs"></i> Motors</a></li>
+        </ul>
+        
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active fade-in" id="floors">
+                <div class="row" id="floorList"></div>
+            </div>
+            <div class="tab-pane fade fade-in" id="controllers">
+                <div class="row" id="controllerList"></div>
+            </div>
+            <div class="tab-pane fade fade-in" id="motors">
+                <div class="row" id="motorList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const floors = [
+            { name: 'Floor 1', controllers: 5, motors: 20, status: 'normal' },
+            { name: 'Floor 2', controllers: 3, motors: 15, status: 'fault' }
+        ];
+        
+        const controllers = [
+            { name: 'Controller A', floor: 'Floor 1', status: 'normal', motors: 10 },
+            { name: 'Controller B', floor: 'Floor 2', status: 'fault', motors: 5 }
+        ];
+        
+        const motors = [
+            { name: 'Motor 1', controller: 'Controller A', position: '50%', status: 'normal' },
+            { name: 'Motor 2', controller: 'Controller B', position: '75%', status: 'fault' }
+        ];
+        
+        function renderFloors() {
+            let html = '';
+            floors.forEach(floor => {
+                html += `<div class="col-md-4 fade-in">
+                            <div class="card mb-3 status-${floor.status}">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-building"></i> ${floor.name}</h5>
+                                    <p><i class="fas fa-microchip"></i> Controllers: ${floor.controllers}</p>
+                                    <p><i class="fas fa-cogs"></i> Motors: ${floor.motors}</p>
+                                    <p>Status: ${floor.status}</p>
+                                </div>
+                            </div>
+                        </div>`;
+            });
+            $('#floorList').html(html);
+        }
+        
+        function renderControllers() {
+            let html = '';
+            controllers.forEach(controller => {
+                html += `<div class="col-md-4 fade-in">
+                            <div class="card mb-3 status-${controller.status}">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-microchip"></i> ${controller.name}</h5>
+                                    <p><i class="fas fa-building"></i> Floor: ${controller.floor}</p>
+                                    <p><i class="fas fa-cogs"></i> Motors: ${controller.motors}</p>
+                                    <p>Status: ${controller.status}</p>
+                                </div>
+                            </div>
+                        </div>`;
+            });
+            $('#controllerList').html(html);
+        }
+        
+        function renderMotors() {
+            let html = '';
+            motors.forEach(motor => {
+                html += `<div class="col-md-4 fade-in">
+                            <div class="card mb-3 status-${motor.status}">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-cogs"></i> ${motor.name}</h5>
+                                    <p><i class="fas fa-microchip"></i> Controller: ${motor.controller}</p>
+                                    <p>Position: ${motor.position}</p>
+                                    <p>Status: ${motor.status}</p>
+                                </div>
+                            </div>
+                        </div>`;
+            });
+            $('#motorList').html(html);
+        }
+        
+        $(document).ready(function () {
+            renderFloors();
+            renderControllers();
+            renderMotors();
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motor Status Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+  <style>
+    body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #4a90e2, #6a5acd);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.controls input {
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+}
+
+.controls button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background: #ff6f61;
+  color: white;
+  cursor: pointer;
+}
+
+.notification {
+  position: relative;
+  cursor: pointer;
+}
+
+.badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size : 12px;
+}
+
+.controller-status, .motor-status, .chart-section {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.controller-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.controller-card {
+  background: #e7f3fe;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.controller-card:hover {
+  transform: scale(1.05);
+}
+
+.progress-bar {
+  height: 10px;
+  background: #4caf50;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.status-no-error {
+  color: green;
+}
+
+.status-error {
+  color: red;
+}
+
+.chart-section {
+  text-align: center;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <header>
+      <h1>Motor Status Dashboard</h1>
+      <div class="controls">
+        <input type="text" id="search" placeholder="Search...">
+        <button id="filter">Filter</button>
+        <div class="notification">🔔 <span class="badge">2</span></div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Motor Controller Status -->
+      <section class="controller-status">
+        <h2>Motor Controller Status</h2>
+        <div class="controller-grid">
+          <div class="controller-card" data-status="no-fault">
+            <span class="icon">✅</span>
+            <h3>Controller 1</h3>
+            <p>Operational</p>
+            <div class="progress-bar"></div>
+          </div>
+          <div class="controller-card" data-status="fault">
+            <span class="icon">⚠️</span>
+            <h3>Controller 2</h3>
+            <p>Fault Detected</p>
+            <div class="progress-bar"></div>
+          </div>
+          <!-- Add more controllers here -->
+        </div>
+      </section>
+
+      <!-- Individual Motor Status -->
+      <section class="motor-status">
+        <h2>Individual Motor Status</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Motor ID</th>
+              <th>Current Position</th>
+              <th>Error Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Motor 1</td>
+              <td>45%</td>
+              <td class="status-no-error">No Error</td>
+            </tr>
+            <tr>
+              <td>Motor 2</td>
+              <td>78%</td>
+              <td class="status-error">Error: 102</td>
+            </tr>
+            <!-- Add more motors here -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <!-- Chart Section -->
+    <section class="chart-section">
+      <h2>System Health Overview</h2>
+      <canvas id="healthChart"></canvas>
+    </section>
+  </div>
+
+  <script>
+    // Sample data for the chart
+const ctx = document.getElementById('healthChart').getContext('2d');
+const healthChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    datasets: [{
+      label: 'System Health',
+      data: [65, 59, 80, 81, 56, 55, 40],
+      fill: false,
+      borderColor: 'rgba(75, 192, 192, 1)',
+      tension: 0.1
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'System Health Overview'
+      }
+    }
+  }
+});
+
+// GSAP animations
+gsap.from("header", { duration: 1, y: -50, opacity: 0 });
+gsap.from(".controller-card", { duration: 0.5, scale: 0, stagger: 0.2 });
+gsap.from("table", { duration: 1, opacity: 0, y: 20 });
+gsap.from(".chart-section", { duration: 1, opacity: 0, y: 20 });
+  </script>
+</body>
+</html>

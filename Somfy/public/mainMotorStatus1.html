@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Status</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+    <script type="text/javascript">
+        var require = {
+            paths: {
+                "nmodule": "/module",
+                "baja": "/module/bajaScript/rc/plugin/baja",
+                "bajaScript": "/module/bajaScript/rc",
+                "bajaux": "/module/bajaux/rc",
+                "lex": "/module/js/rc/lex/lexplugin",
+                "log": "/module/js/rc/log/logPlugin",
+                "css": "/module/js/com/tridium/js/ext/require/css",
+                "jquery": "/module/js/rc/jquery/jquery",
+                "Handlebars": "/module/js/rc/handlebars/handlebars",
+                "Promise": "/module/js/rc/bluebird/bluebird",
+                "hbs": "/module/js/rc/require-handlebars-plugin/hbs",
+                "i18nprecompile": "/module/js/rc/require-handlebars-plugin/hbs/i18nprecompile",
+                "json2": "/module/js/rc/require-handlebars-plugin/hbs/json2",
+                "underscore": "/module/js/rc/underscore/underscore",
+                "baja.comm.Batch": "/module/bajaScript/baja.comm.Batch",
+                "dialogs": '/module/js/rc/dialogs/dialogs.built.min'
+            },
+            hbs: {
+                disableI18n: true
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tailwind.css">
+    <link rel="stylesheet" href="fontawesome-free/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .card {
+            width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: #45a049;
+        }
+
+        .pagination .active {
+            background-color: #555;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #4a5568;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f7fafc;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+
+         /* Pagination styles */
+         .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #555;
+        }
+        .pagination .active {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-6 pt-24 h-screen overflow-y-auto">
+    <!-- Alert Message Container -->
+    <div id="alert-message" class="alert"></div>
+    
+    <div class="container-fluid">
+        <!-- Navbar -->
+        <nav class="bg-white navbar fixed top-0 left-0 right-0 shadow-sm p-2 mb-0 z-10">
+            <div class="flex justify-between items-center">
+                <a class="flex items-center" href="#">
+                    <img src="/public/Images/somfy1.jpeg" alt="Logo" class="h-8">
+                </a>
+                <h1 class="text-2xl font-bold">Motor Status Dashboard</h1>
+                <!-- Dropdown Button -->
+                <div class="dropdown relative">
+                    <button id="dropdownButton" class="bg-white p-2 rounded-lg hover:bg-gray-50 focus:outline-none" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                    <div class="dropdown-content mt-2">
+                        <a href="../index.html">Main Dashboard</a>
+                        <a href="log.html">Log Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="bg-white rounded-lg shadow-lg p-6 h-auto overflow-none ">
+            <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            <div id="pagination" class="flex justify-center space-x-2 mt-6"></div>
+        </div>
+
+        <footer class="text-center text-sm bottom-0 left-0 right-0 p-2 mb-0 z-10 mt-0 text-gray-600">
+            Designed And Developed By &copy Ked Technology
+        </footer>
+    </div>
+
+    <!--<script src="file:^newxlsx.js"></script>-->
+    <script type="text/javascript" 
+            data-main="/module/bajaScript/rc/plugin/baja" 
+            src="file:^rc/requireJs.js"></script>
+    
+    <script src="js/tailwind.js"></script>
+
+    <script>
+
+        
+     require([
+    'baja!',
+    'baja!control:NumericWritable',
+    'baja!control:BooleanWritable',
+    'baja!control:StringWritable'
+], function (
+    baja,
+    NumericWritable,
+    BooleanWritable,
+    StringWritable
+) {
+    "use strict";
+
+    const sub = new baja.Subscriber();
+    
+    function fetchLatestAlarm(mocoPath, mocoName, floorName) {
+    return new Promise((resolve, reject) => {
+        console.log(`Checking alarms for ${mocoName} on ${floorName} at path: ${mocoPath}`);
+        
+        // Make the query specific to the full path
+        var query = baja.Ord.make(
+            `local:|fox:|alarm:|bql:select * where source like '%${mocoName}%'`
+        );
+
+        query.get().then(function (table) {
+            let alarms = [];
+            let allSources = new Set();
+
+            table.cursor({
+                each: function () {
+                    const source = String(this.get("source"));
+                    const alarmData = String(this.get("alarmData"));
+                    const timestamp = new Date(this.get("timestamp"));
+
+                    allSources.add(source);
+                    console.log(`Found alarm source: ${source}`);
+
+                    // Verify the source matches our complete path
+                    if (source.includes(mocoPath)) {
+                        const match = alarmData.match(/msgText=([^,]*)/);
+                        if (match) {
+                            alarms.push({
+                                source: source,
+                                message: match[1],
+                                timestamp: timestamp
+                            });
+                        }
+                    }
+                }
+            }).then(() => {
+                console.log(`All alarm sources for ${mocoPath}:`, Array.from(allSources));
+
+                // Get the latest alarm for this specific path
+                const latestAlarm = alarms.length > 0 
+                    ? alarms.reduce((latest, alarm) => 
+                        alarm.timestamp > latest.timestamp ? alarm : latest
+                      ) 
+                    : null;
+
+                if (latestAlarm) {
+                    console.log(`Latest alarm for ${mocoName} on ${floorName}:`, latestAlarm.message);
+                } else {
+                    console.log(`No alarms found for ${mocoName} on ${floorName}`);
+                }
+
+                resolve(latestAlarm);
+            });
+        }).catch(err => {
+            console.error(`Alarm query failed for ${mocoName} on ${floorName}:`, err);
+            reject(err);
+        });
+    });
+}
+
+async function checkAlarmStatus(mocoPath, mocoName, floorName) {
+    try {
+        const alarm = await fetchLatestAlarm(mocoPath, mocoName, floorName);
+        
+        return { 
+            hasFault: alarm !== null,
+            alarmMessage: alarm ? "Fault detected" : "Normal operation",
+            alarmDetails: alarm ? alarm.message : null,
+            alarmTimestamp: alarm ? alarm.timestamp : null,
+            floorName: floorName,
+            mocoName: mocoName
+        };
+        
+    } catch (err) {
+        console.error(`Error checking status for ${mocoName} on ${floorName}:`, err);
+        return { 
+            hasFault: false, 
+            alarmMessage: "Status check failed",
+            alarmDetails: null,
+            alarmTimestamp: null,
+            floorName: floorName,
+            mocoName: mocoName
+        };
+    }
+}
+
+    function getFolderNames(parentPath) {
+        return new Promise((resolve) => {
+            baja.Ord.make(parentPath).get({ subscriber: sub })
+                .then(parent => {
+                    if (!parent) {
+                        console.warn('Parent not found:', parentPath);
+                        resolve([]);
+                        return;
+                    }
+                    
+                    const slots = parent.getSlots()
+                        .properties()
+                        .isComponent()
+                        .toArray();
+                    
+                    const names = slots.map(slot => slot.getName());
+                    console.log('Found folder names at', parentPath, ':', names);
+                    resolve(names);
+                })
+                .catch(err => {
+                    console.error('Error getting folder names from', parentPath, err);
+                    resolve([]);
+                });
+        });
+    }
+
+    function fetchStatusData() {
+    const basePath = 'station:|slot:/Drivers/somfy/maincontroller';
+    const statusData = [];
+    
+    const floorNumbers = {};
+    let nextFloorNumber = 1;
+    const mocoCounters = {};
+
+    console.log('Starting data fetch from:', basePath);
+    
+    return getFolderNames(basePath)
+        .then(floorNames => {
+            if (!floorNames || floorNames.length === 0) {
+                console.warn('No floors found at path:', basePath);
+                return [];
+            }
+
+            const floorPromises = floorNames.map(floorName => {
+                const floorPath = `${basePath}/${floorName}`;
+                
+                if (!floorNumbers[floorName]) {
+                    floorNumbers[floorName] = nextFloorNumber++;
+                    mocoCounters[floorName] = 1;
+                }
+                
+                return getFolderNames(floorPath)
+                    .then(mocoNames => {
+                        if (!mocoNames || mocoNames.length === 0) {
+                            console.warn('No mocos found for floor:', floorName);
+                            return;
+                        }
+
+                        const mocoPromises = mocoNames.map(mocoName => {
+                            console.log('Processing moco:', mocoName);
+                            const mocoPath = `${basePath}/${floorName}/${mocoName}`;
+                            
+                            return checkAlarmStatus(mocoPath, mocoName, floorName).then(({ 
+                                hasFault, 
+                                alarmMessage, 
+                                alarmDetails, 
+                                alarmTimestamp 
+                            }) => {
+                                statusData.push({
+                                    floor: floorName,
+                                    moco: mocoName,
+                                    alarmMessage: alarmMessage,
+                                    mocoFault: hasFault ? "fault" : "No fault",
+                                    alarmDetails: alarmDetails,
+                                    alarmTimestamp: alarmTimestamp,
+                                    id1: floorNumbers[floorName],
+                                    id2: mocoCounters[floorName]++,
+                                    floorPath: floorPath,
+                                    mocoPath: mocoPath
+                                });
+                            });
+                        });
+
+                        return Promise.all(mocoPromises);
+                    });
+            });
+            
+            return Promise.all(floorPromises).then(() => statusData);
+        })
+        .catch(err => {
+            console.error('Error in fetchStatusData:', err);
+            return [];
+        });
+}
+
+let currentPage = 1;
+        const itemsPerPage = 12;
+       let totalPages;
+
+    function displayCards(data) {  
+    totalPages = Math.ceil(data.length / itemsPerPage);
+    const cardsContainer = document.getElementById('cards-container');
+    if (!cardsContainer) {
+        console.error('cards-container element not found!');
+        return;
+    }
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const currentPageData = data.slice(start, end);
+
+    cardsContainer.innerHTML = '';
+
+    if (currentPageData.length === 0) {
+        cardsContainer.innerHTML = '<div class="text-center py-8 text-red-500">No motor controllers found</div>';
+        return;
+    }
+
+    const floors = {};
+    currentPageData.forEach(item => {
+        if (!floors[item.floor]) {
+            floors[item.floor] = [];
+        }
+        floors[item.floor].push(item);
+    });
+
+    for (const floorName in floors) {
+
+        floors[floorName].forEach(item => {
+            const card = document.createElement('div');
+             card.classList.add('bg-white-100', 'p-2', 'rounded-lg','card', 'h-auto', 'flex', 'flex-col', 'w-auto');
+
+            const isFault = item.mocoFault === 'fault';
+            const statusColor = isFault ? 'text-red-500' : 'text-green-500';
+            const statusIcon = isFault
+                ? `<i class="fas fa-exclamation-circle ${statusColor} text-3xl"></i>` 
+                : `<i class="fas fa-check-circle ${statusColor} text-3xl"></i>`;
+
+            
+            const formattedMoco = item.moco.replace(/(\D)(\d)/, '$1 $2'); 
+            const formattedFloor = item.floor.replace(/(\D)(\d)/, '$1 $2'); 
+
+        
+
+            // Determine the alarm message
+            const alarmMessage = isFault 
+                ? (item.alarmDetails || 'No additional details available') 
+                : 'No Fault';
+            
+            // Determine the color
+            const alarmColor = isFault 
+                ? 'text-red-500'   // If there's a fault, color is red
+                : 'text-green-500'; // If no fault, color is green
+            
+            card.innerHTML = `
+                <div class="m-0 p-0 flex">
+                    <div class="m-2 text-white p-0 rounded-full">
+                        ${statusIcon}
+                    </div>
+                    <h3 class="text-center font-bold text-3xl mt-2">${formattedFloor}</h3>
+                </div>
+                
+                <div class="flex items-center justify-between pt-2 m-2">
+                    <div class="ml-4">
+                        <h5 class="text-gray-600 text-xl">${formattedMoco}</h5>
+                        <p class="${alarmColor} text-xl">Status: ${alarmMessage}</p>
+                    </div>
+                </div>
+            `;
+
+
+
+            card.onclick = () => {
+                localStorage.setItem('selectedMotorId', item.id1);
+                localStorage.setItem('floorMocoId', item.id2);
+                localStorage.setItem('floorPath', item.floorPath);
+                localStorage.setItem('mocoPath', item.mocoPath);
+                window.location.href = 'motorStatusControl.html';
+            };
+
+            cardsContainer.appendChild(card);
+        });
+    }
+
+    updatePagination(data.length);
+}
+
+function updatePagination() {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayCards();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.classList.toggle('bg-gray-500', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    displayCards();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayCards();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+
+    // Main execution
+    console.log('Initializing application...');
+    fetchStatusData()
+        .then(data => {
+            console.log('Data to display:', data);
+            displayCards(data);
+        })
+        .catch(error => {
+            console.error('Initialization failed:', error);
+            const container = document.getElementById('cards-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8 text-red-500">Failed to load motor data</div>';
+            }
+        });
+});
+    </script>
+</body>
+</html>

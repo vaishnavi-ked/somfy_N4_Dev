@@ -1,0 +1,122 @@
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .card {
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Dropdown styles */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #4a5568;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f7fafc;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+          /* Custom Scrollbar */
+          ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Custom Media Queries */
+        @media (max-width: 640px) {
+            /* Adjust navbar for small screens */
+            .navbar h1 {
+                font-size: 1.25rem; /* Reduce title size */
+            }
+
+            /* Reduce card height for small screens */
+            .card {
+                height: auto;
+                padding: 1rem;
+            }
+
+            /* Adjust grid layout for small screens */
+            .grid-cols-1 {
+                grid-template-columns: 1fr;
+            }
+
+            /* Reduce font size for small screens */
+            .text-lg {
+                font-size: 1rem;
+            }
+
+            .text-3xl {
+                font-size: 1.5rem;
+            }
+
+            .text-6xl {
+                font-size: 3rem;
+            }
+
+            /* Enable scrolling for small screens */
+            .dashboard-content {
+                overflow-y: auto;
+                max-height: calc(100vh - 120px); /* Adjust height to fit screen */
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 1024px) {
+            /* Adjust grid layout for medium screens */
+            .sm\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /* Adjust card height for medium screens */
+            .card {
+                height: 250px;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            /* Adjust grid layout for large screens */
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            /* Adjust card height for large screens */
+            .card {
+                height: 270px;
+            }
+        }

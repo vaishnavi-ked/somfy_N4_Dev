@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Status</title>
+    <script src="file:^TextFile.js"></script>
+    <script type="text/javascript">
+        var require = {
+            paths: {
+                "nmodule": "/module",
+                "baja": "/module/bajaScript/rc/plugin/baja",
+                "bajaScript": "/module/bajaScript/rc",
+                "bajaux": "/module/bajaux/rc",
+                "lex": "/module/js/rc/lex/lexplugin",
+                "log": "/module/js/rc/log/logPlugin",
+                "css": "/module/js/com/tridium/js/ext/require/css",
+                "jquery": "/module/js/rc/jquery/jquery",
+                "Handlebars": "/module/js/rc/handlebars/handlebars",
+                "Promise": "/module/js/rc/bluebird/bluebird",
+                "hbs": "/module/js/rc/require-handlebars-plugin/hbs",
+                "i18nprecompile": "/module/js/rc/require-handlebars-plugin/hbs/i18nprecompile",
+                "json2": "/module/js/rc/require-handlebars-plugin/hbs/json2",
+                "underscore": "/module/js/rc/underscore/underscore",
+                "baja.comm.Batch": "/module/bajaScript/baja.comm.Batch",
+                "dialogs": '/module/js/rc/dialogs/dialogs.built.min'
+                // "baja!schedule:Schedule": "/module/bajaScript/rc/schedule/Schedule",
+            },
+            hbs: {
+                disableI18n: true
+            }
+        };
+        console.log("RequireJS paths set:", require);
+    </script>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico"> <!-- Favicon -->
+    <script src="public/css/tailwind.css"></script>
+    <link rel="stylesheet" href="public/fontawesome-free/css/all.min.css">
+    <link href="public/font.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .card {
+            width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: #45a049;
+        }
+
+        .pagination .active {
+            background-color: #555;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #4a5568;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f7fafc;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+
+         /* Pagination styles */
+         .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #555;
+        }
+        .pagination .active {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6 pt-24 h-screen overflow-y-auto">
+    <div class="container-fluid">
+        <!-- Navbar (keep existing) -->
+        <nav class="bg-white navbar fixed top-0 left-0 right-0 shadow-sm p-2 mb-0 z-10">
+            <!-- ... -->
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="bg-white rounded-lg shadow-lg p-6 h-auto overflow-none">
+            <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            <div id="pagination" class="flex justify-center space-x-2 mt-6"></div>
+            <div id="loading" class="text-center py-4">
+                <i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>
+                <p class="mt-2">Loading motor data...</p>
+            </div>
+        </div>
+
+        <footer class="text-center text-sm bottom-0 left-0 right-0 p-2 mb-0 z-10 mt-0 text-gray-600">
+            Designed And Developed By &copy Ked Technology
+        </footer>
+    </div>
+    
+     <!--<script src="file:^newxlsx.js"></script>-->
+<script type="text/javascript" 
+        data-main="/module/bajaScript/rc/plugin/baja" 
+        src="file:^rc/requireJs.js"></script>
+      
+      <script src="public/js/tailwind.js"></script>
+
+    <!-- Replace the script section with this: -->
+    <script>
+        require([
+            'baja!',
+            'baja!control:NumericWritable',
+            'baja!control:BooleanWritable',
+            'baja!control:StringWritable'
+        ], function (
+            baja,
+            NumericWritable,
+            BooleanWritable,
+            StringWritable
+        ) {
+            "use strict";
+
+            const sub = new baja.Subscriber();
+            let currentPage = 1;
+            const itemsPerPage = 12;
+            let statusData = [];
+            let totalPages = 1;
+
+            // Initialize when BAJA is ready
+            fetchStatusData().then(data => {
+    statusData = data;
+    totalPages = Math.ceil(statusData.length / itemsPerPage);
+    displayCards();
+    document.getElementById('loading').style.display = 'none';
+  }).catch(err => {
+    console.error("Error fetching data:", err);
+    document.getElementById('loading').innerHTML = 
+      `<p class="text-red-500">Error loading data: ${err.message}</p>`;
+  });
+
+            async function fetchStatusData() {
+                const statusData = [];
+                const baseSlotPath = 'station:|slot:/Drivers/somfy/maincontroller/';
+
+                try {
+                    const mainController = await baja.get(baseSlotPath);
+                    const floors = await getChildFolders(mainController);
+
+                    for (const floor of floors) {
+                        const mocos = await getChildFolders(floor);
+
+                        for (const moco of mocos) {
+                            const motors = await getChildFolders(moco);
+
+                            for (const motor of motors) {
+                                const hasError = await getMotorErrorStatus(motor);
+                                
+                                statusData.push({
+                                    floor: floor.getId().toString().split('/').pop(),
+                                    moco: moco.getId().toString().split('/').pop(),
+                                    mocoFault: hasError ? "fault" : "No fault",
+                                    id: statusData.length + 1,
+                                    motorPath: motor.getId().toString() // Store path for motor control
+                                });
+                            }
+                        }
+                    }
+
+                    return statusData;
+                } catch (err) {
+                    console.error("Error fetching status data:", err);
+                    return [];
+                }
+            }
+
+            // Helper functions (getChildFolders, getMotorErrorStatus) remain the same as previous example
+
+            function displayCards() {
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const currentPageData = statusData.slice(start, end);
+                const cardsContainer = document.getElementById('cards-container');
+                
+                cardsContainer.innerHTML = '';
+
+                currentPageData.forEach(data => {
+                    const card = document.createElement('div');
+                    card.classList.add('bg-white-100', 'p-2', 'rounded-lg','card', 'h-auto', 'flex', 'flex-col', 'w-auto');
+                    
+                    const mocoIcon = data.mocoFault === 'fault' 
+                        ? `<i class="fas fa-exclamation-circle text-red-500 text-3xl"></i>` 
+                        : `<i class="fas fa-check-circle text-green-500 text-3xl"></i>`;
+                    
+                    card.innerHTML = `
+                        <div class="m-0 p-0 flex items-center justify-content-between">
+                            <div class="m-2 text-white p-0 rounded-full">
+                                ${mocoIcon}
+                            </div>
+                            <h3 class="text-center font-bold text-3xl">${data.floor}</h3>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 m-2">
+                            <div class="ml-4">
+                                <h5 class="text-gray-600 text-xl">${data.moco}</h5>
+                                <p class="text-${data.mocoFault === 'fault' ? 'red' : 'green'}-500 text-xl">Status: ${data.mocoFault}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    card.onclick = () => {
+                        window.location.href = `motorStatusControl.html?path=${encodeURIComponent(data.motorPath)}`;
+                    };
+                    
+                    cardsContainer.appendChild(card);
+                });
+
+                updatePagination();
+            }
+
+            function updatePagination() {
+                const paginationContainer = document.getElementById('pagination');
+                paginationContainer.innerHTML = '';
+
+                const prevButton = document.createElement('button');
+                prevButton.innerText = 'Previous';
+                prevButton.disabled = currentPage === 1;
+                prevButton.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        displayCards();
+                    }
+                });
+                paginationContainer.appendChild(prevButton);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.innerText = i;
+                    pageButton.classList.toggle('bg-gray-500', i === currentPage);
+                    pageButton.addEventListener('click', () => {
+                        currentPage = i;
+                        displayCards();
+                    });
+                    paginationContainer.appendChild(pageButton);
+                }
+
+                const nextButton = document.createElement('button');
+                nextButton.innerText = 'Next';
+                nextButton.disabled = currentPage === totalPages;
+                nextButton.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        displayCards();
+                    }
+                });
+                paginationContainer.appendChild(nextButton);
+            }
+
+            // Dropdown functionality (keep existing)
+            const dropdownButton = document.getElementById('dropdownButton');
+            const dropdownContent = document.querySelector('.dropdown-content');
+
+            dropdownButton.addEventListener('click', () => {
+                dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!dropdownButton.contains(event.target) && !dropdownContent.contains(event.target)) {
+                    dropdownContent.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
