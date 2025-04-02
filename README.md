@@ -20,21 +20,13 @@
    ```
    Niagara station -> station name -> shared
    ```
-
-3. **Start a Web Server**:
-   Use a web server to serve the project files. For example, using Python's built-in HTTP server:
-   ```bash
-   python -m http.server
-   ```
-   This will start a server at `http://localhost:8000`.
-
-4. **Access the Dashboard**:
+3. **Access the Dashboard**:
    Open your browser and navigate to `http://localhost:8000/index.html`.
 
-5. **Niagara Integration**:
+4. **Niagara Integration**:
    Ensure the Niagara station is running and accessible. The dashboard fetches real-time data from the Niagara station using Object Reference Descriptors (ORDs).
 
-6. **Auto-Refresh**:
+5. **Auto-Refresh**:
    The dashboard automatically refreshes sensor data every second. You can modify the refresh interval in the `updateDashboard` function in `index.html`.
 
 ## Features
