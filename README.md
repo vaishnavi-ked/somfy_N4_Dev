@@ -1,42 +1,4 @@
-# somfy_N4_Dev
-
 # SomfyDashboard_N4_Development
-
-# Sensor Status Dashboard
-
-This project is a web-based dashboard for monitoring sensor data such as Lux Levels, Temperature, Occupancy, Light Levels, Wind, and Rain Status. It is built using HTML, CSS, and JavaScript with integration to Niagara Framework for real-time data fetching.
-
-## Project Structure
-
-```
-.
-├── alarm.html
-├── bajastatus.html
-├── index.html
-├── NavFile.nav
-├── test.html
-├── .vscode/
-│   └── settings.json
-├── For testing/
-│   ├── backup.html
-│   ├── bar.html
-│   ├── blackmotor.html
-│   ├── ...
-├── public/
-│   ├── font.css
-│   ├── log.html
-│   ├── Images/
-│   │   └── somfy1.jpeg
-│   ├── css/
-│   │   └── tailwind.css
-│   ├── fontawesome-free/
-│   │   └── css/
-│   │       └── all.min.css
-│   ├── js/
-│   │   └── tailwind.js
-│   └── ...
-└── README.md
-```
 
 ## Prerequisites
 
@@ -53,13 +15,26 @@ This project is a web-based dashboard for monitoring sensor data such as Lux Lev
    cd <repository-folder>
    ```
 
-2. **Access the Dashboard**:
+2. **Add Files to Niagara Station**:
+   Copy the cloned files and folders into the Niagara station directory:
+   ```
+   Niagara station -> station name -> shared
+   ```
+
+3. **Start a Web Server**:
+   Use a web server to serve the project files. For example, using Python's built-in HTTP server:
+   ```bash
+   python -m http.server
+   ```
+   This will start a server at `http://localhost:8000`.
+
+4. **Access the Dashboard**:
    Open your browser and navigate to `http://localhost:8000/index.html`.
 
-3. **Niagara Integration**:
+5. **Niagara Integration**:
    Ensure the Niagara station is running and accessible. The dashboard fetches real-time data from the Niagara station using Object Reference Descriptors (ORDs).
 
-4. **Auto-Refresh**:
+6. **Auto-Refresh**:
    The dashboard automatically refreshes sensor data every second. You can modify the refresh interval in the `updateDashboard` function in `index.html`.
 
 ## Features
